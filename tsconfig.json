@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",          // 推荐与 Rollup 输出目标一致
+    "module": "ESNext",          // 使用 ESM 模块规范
+    "moduleResolution": "node",  // 模块解析策略
+    "outDir": "dist",            // 输出目录（需与 Rollup 配置对齐）
+    "rootDir": "src",            // 源码目录
+    "allowJs": true,             // 允许编译 JS 文件
+    "checkJs": true,             // 可选：对 JS 文件进行类型检查
+    "strict": false,             // 初始阶段关闭严格模式
+    "esModuleInterop": true,      // 兼容 CommonJS 模块
+    "baseUrl": ".",
+    "paths": {
+      "@utils/*": ["src/*"]
+    },
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

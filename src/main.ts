@@ -30,6 +30,7 @@ export default class TagWrangler extends Plugin {
     tagAliasInfo:TagAliasInfo = null;
     settings: TagSettings = { enableLevel2: true, tagoncount: 1 };
     tool: Tool;
+    isSelfClick:boolean = false;
     static tagPlugin: TagWrangler = null;
     // @ts-ignore
     constructor(app, manifest) {
@@ -228,12 +229,14 @@ export default class TagWrangler extends Plugin {
                 return function getTags() {
                     const tags = old.call(this);
                     const names = new Set(Object.keys(tags)); // .map(t => t.toLowerCase()));
-                    const arr = ['tech','excalidraw', 'distribute', 'res', 'eg', '_', 't'];
+                    const arr = ['tech', 'res', 't'];
 
                     // @ts-ignore
                     // @ts-ignore
                     let tagtoDel = [];
-
+                    if (tags['#task']) {
+                        tags['#task'] += 20000;
+                    }
                     for (const tagKey of names) {
                         if (tagKey.contains('/')) {
                             continue;
@@ -294,7 +297,7 @@ export default class TagWrangler extends Plugin {
                                 new EnterTagsModal(this.app, async (tags, includeSubfolders) => {
                                     if (tags) {
                                         const tagArray = tags.split(",");
-                                        await this.addTagsToNotes(tagArray, folder, includeSubfolders);
+                                        await this.tool.addTagsToNotes(tagArray, folder, includeSubfolders);
                                     }
                                 }).open();
                             });
@@ -304,33 +307,93 @@ export default class TagWrangler extends Plugin {
             const that = this;
             // @ts-ignore
             app.workspace.getLeavesOfType("tag").forEach(leaf => {
-                const tree = leaf?.view?.tree;
+                const view = leaf?.view;
+                const tree = view?.tree;
                 const tagDoms = leaf?.view?.tagDoms;
                 if (tree && tagDoms && !hookTreeFlag) {
                     hookTreeFlag = true;
-                    tree.prefersCollapsed = true;
+                    // this.register(around(view, {
+                    //     updateTags(old){
+                    //         return function() {
+                    //             console.log('updateTags',arguments);
+                    //             // console.trace();
+                    //             return;
+                    //         }
+                    //     },
+                    //     setIsAllCollapsed(old) {
+                    //         return function() {
+                    //             console.log('setIsAllCollapsed',arguments);
+                    //             // console.trace();
+                    //             return;
+                    //         }
+                    //     }
+                    // }));
                     this.register(around(Object.getPrototypeOf(tree), {
-                        setCollapseAll(old) {
-                            return function (isOpen) {
-                                return old.call(this, isOpen);
+                        // setCollapseAll(old) {
+                        //     return function (isOpen) {
+                        //         console.log('setCollapseAll',arguments);
+                        //         console.trace();
+                        //         return;
+                        //         return old.call(this, isOpen);
+                        //     };
+                        // },
+                        toggleCollapseAll(old) {
+                            return function () {
+                                console.log('isAllCollapsed',this.isAllCollapsed);
+                                if (this.isAllCollapsed) {
+                                    return old.call(this);
+                                }
+                                // this.isAllCollapsed = false;
                             };
-                        }
+                        },
                     }));
                     const dom = Object.values(tagDoms).first();
                     this.register(around(Object.getPrototypeOf(dom), {
-                        updateCollapsed(old) {
-                            return function (isOpen) {
+                        setCollapsed(old) {
+                            return function (a,b) {
+                                if (!that.isSelfClick) {
+                                    return;
+                                }
+                                // const stack = new Error().stack; // 这一步拦截
+                                // if (stack.includes('register.onElement.capture')) { 
+                                    
+                                // }
                                 if (!this.tag.contains('/')) {
-                                    return old.call(this, isOpen);
+                                    return old.call(this, a,b);
                                 }
-                                if (that.settings.enableLevel2 || this.collapsed) {
-                                    return old.call(this, isOpen);
+                                if (that.settings.enableLevel2 || !this.collapsed) {
+                                    return old.call(this, a,b);
                                 }
-                            };
-                        }
+                            }
+                        },
                     }));
+                    // const arr = ['tech', 'res', 't'];
+                    // let allOpen = true;
+                    // for (const item of arr) {
+                    //     const tagOri = '#'+item;
+                    //     const dom = view.tagDoms[tagOri];
+                    //     if (dom && dom.collapsible && dom.collapsed) {
+                    //         console.log(`${dom.tag} collapsed`);
+                    //         allOpen = false;
+                    //         break;
+                    //     }
+                    // }
+
+                    
+                    // if (allOpen) {
+                    //     console.log('all open');
+                    //     this.isSelfClick = true;
+                    //     // tree.toggleCollapseAll();
+                    //     tree.prefersCollapsed = true;
+                    //     tree.isAllCollapsed = true;
+                    //     view?.requestUpdateTags?.();
+                    //     setTimeout(() => {
+                    //         this.isSelfClick = false;
+                    //     }, 2000);
+                    // }
+                    // if (!tree.isAllCollapsed) {
+                    // }
                 }
-                leaf?.view?.requestUpdateTags?.();
             });
         });
     }

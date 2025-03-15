@@ -257,14 +257,16 @@ export class Tool {
         e.stopPropagation();
 
         if (search) {
-            menu.addSeparator().addItem(
+            menu.addSeparator();
+            if (tagName.contains('task/')) {
+                menu.addItem(item("pencil", "Complete #" + tagName, () => this.complete(tagName)));
+            }
+            menu.addItem(
                 item("magnifying-glass", "New search for #" + tagName, () => search.openGlobalSearch("tag:" + tagName))
             );
         }
         menu.addItem(item("pencil", "Rename #" + tagName, () => this.rename(tagName)));
-        if (tagName.contains('task/')) {
-            menu.addItem(item("pencil", "Complete #" + tagName, () => this.complete(tagName)));
-        }
+        
 
         this.app.workspace.trigger("tag-wrangler:contextmenu", menu, tagName, { search, query, isHierarchy});
 

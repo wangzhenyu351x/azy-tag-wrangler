@@ -61,6 +61,7 @@ export class TagPageUIHandler extends Component {
                     }
 
                     const keys = Object.keys(tagView.tagDoms);
+                    this.plugin.isSelfClick = true;
                     for (const key of keys) {
                         if (key == '#'+tagName.toLowerCase()) {
                             const tag = tagView.tagDoms[key];
@@ -75,6 +76,7 @@ export class TagPageUIHandler extends Component {
                             
                         }
                     }
+                    this.plugin.isSelfClick = false;
                     event.preventDefault();
                     event.stopPropagation();
                     return false;

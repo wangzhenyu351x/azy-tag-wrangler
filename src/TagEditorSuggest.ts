@@ -81,7 +81,7 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 					ch: newQuery.length + subString.lastIndexOf('#') +1,
 					line: cursor.line
 				},
-				query: newQuery,
+				query: newQuery.toLowerCase(),
 			};
 			const excludeSomeChar = ' :|#@$%()';
 			for (const char of excludeSomeChar) {

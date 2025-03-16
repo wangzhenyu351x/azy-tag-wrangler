@@ -16,9 +16,7 @@ import { TagPageUIHandler, onElement } from "./TagPageUIHandler";
 import { around } from "monkey-around";
 import { TagSettingsTab } from "./TagSettingTab";
 import { Tool, execCmdString } from "./tool";
-// import path from "path";
-// const fs = require('fs');
-// import {FileSuggest} from "./file-suggest";
+import CChooseTagModal from "./zylib/CChooseTagModal";
 
 interface TagSettings {
     enableLevel2: boolean;
@@ -84,6 +82,22 @@ export default class TagWrangler extends Plugin {
             id: "delete-file-and-link",
             name: "Delete file with its link",
             callback: () => this.tool.deleteFileAndItsLink(),
+        });
+
+        this.addCommand({
+            id: "choose tag",
+            name: "choose tag",
+            callback: () => {
+                new CChooseTagModal(this.app).awaitSelection().then((res:string) =>{
+                    // new Notice(res);
+                    // @ts-ignore
+                    const searchPlugin = this.app.internalPlugins.getPluginById("global-search"), 
+                    search = searchPlugin && searchPlugin.instance;
+                    search && search.openGlobalSearch("tag:" + res);
+                }).catch(reason => {
+                    console.log(`cancel ${reason}`);
+                });
+            },
         });
 
         this.addCommand({

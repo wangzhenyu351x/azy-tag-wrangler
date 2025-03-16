@@ -2,8 +2,16 @@ import typescript from '@rollup/plugin-typescript';
 import {nodeResolve} from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import postcss from 'rollup-plugin-postcss';
-const fs = require('fs');
+import fs,{copyFileSync} from 'fs';
 import child from 'child_process'; 
+
+{
+  copyFileSync('../ZYCommonLib/SignatureCheck.ts',`src/zylib/SignatureCheck.ts`);
+  copyFileSync('../ZYCommonLib/CommonTool.ts',`src/zylib/CommonTool.ts`);
+  copyFileSync('../ZYCommonLib/CChooseFileModal.ts',`src/zylib/CChooseFileModal.ts`);
+  copyFileSync('../ZYCommonLib/CChooseTagModal.ts',`src/zylib/CChooseTagModal.ts`);
+  copyFileSync('../ZYCommonLib/utility.ts',`src/zylib/utility.ts`);
+};
 
 class rollupPlugin {
   constructor(){

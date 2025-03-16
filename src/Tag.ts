@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { kCptTag } from "./renaming";
+import { App, Notice, TFile } from "obsidian";
 
 const tagBody = /^#[^\u2000-\u206F\u2E00-\u2E7F'!"#$%&()*+,.:;<=>?@^`{|}~\[\]\\\s]+$/;
 
@@ -49,6 +50,33 @@ export class Replacement {
         );
     }
 
+    async addToTodayNote(addLine:string){
+        const pluginId = 'obsidian-open-file-by-magic-date';
+        // @ts-ignore
+        const magicDate = window.app.plugins.plugins[pluginId];
+        
+        if (!magicDate) {
+            new Notice(`没有目标插件${pluginId}`);
+            return
+        }
+        const todayNotePath = magicDate.getTodayDailyNoteFile(false);// isyesterday
+        // @ts-ignore
+        const app:App = window.app;
+        let dayliNoteFile = app.vault.getAbstractFileByPath(todayNotePath) as TFile;
+        // 如果不存在就创建.
+        if (!dayliNoteFile) {
+          dayliNoteFile = await app.vault.create(todayNotePath, '');
+        }
+        let dayliNoteContent = await app.vault.read(dayliNoteFile);
+        const kSeperateLine = '++++++\n';
+        const kPaddingStr = ' \n\n';
+        if (!dayliNoteContent.contains(kSeperateLine)) {
+          dayliNoteContent = `${dayliNoteContent.trim()}${kPaddingStr}${kSeperateLine}`;
+        }
+        dayliNoteContent =dayliNoteContent.trim() + `\n${addLine}\n`;
+        await app.vault.modify(dayliNoteFile, dayliNoteContent);
+      }
+
     inString(text, pos = 0, tag = null) {
         let addition = '';
         
@@ -70,7 +98,8 @@ export class Replacement {
             }
             const formatStr = "YY/MM/DD HH:mm";
             const dayfmt = dayjs().format(formatStr);
-            tagName = tagName.replace('#',`${dayfmt} ✅ `);
+            tagName = tagName.replace('#task/',`✅ `) + ` ${dayfmt} `;
+            this.addToTodayNote(tagName);
             return text.slice(0, pos) + tagName + text.slice(pos + fromTagLen);
         }
         return text.slice(0, pos) + this.toTag.tag + addition + text.slice(pos + fromTagLen);

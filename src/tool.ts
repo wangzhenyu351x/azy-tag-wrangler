@@ -243,14 +243,13 @@ export class Tool {
             tagName = tagEl.find(".tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text").textContent;
             isHierarchy = tagEl.parentElement.parentElement.find(".collapse-icon");
         }
-        menu.addItem(item("filter content", "Tag Content", (e) => this.createTagPage(tagName, Keymap.isModEvent(e))));
-        menu.addSeparator();
         menu.addItem(item("pencil", "Alias #" + tagName, () => this.alias(tagName)));
         if ("MapFolder" == this.app.vault.getName()) {
             menu.addItem(item("pencil", `move #${tagName} to Folder`, () => {
                 // let rep = new Replacement(new Tag(tagName),new Tag("today"));
                 // renameTagWith(app, [rep]);
-                this.moveFolder(tagName);
+                // this.moveFolder(tagName);
+                new Notice('先关掉防止误操作');
             }));
         }
         e.preventDefault();
@@ -258,15 +257,16 @@ export class Tool {
 
         if (search) {
             menu.addSeparator();
-            if (tagName.contains('task/')) {
-                menu.addItem(item("pencil", "Complete #" + tagName, () => this.complete(tagName)));
-            }
             menu.addItem(
                 item("magnifying-glass", "New search for #" + tagName, () => search.openGlobalSearch("tag:" + tagName))
             );
         }
         menu.addItem(item("pencil", "Rename #" + tagName, () => this.rename(tagName)));
-        
+        menu.addSeparator();
+        menu.addItem(item("pencil", "Tag Content", (e) => {
+            new Notice('先关掉防止误操作');
+            // this.createTagPage(tagName, Keymap.isModEvent(e))
+        }));
 
         this.app.workspace.trigger("tag-wrangler:contextmenu", menu, tagName, { search, query, isHierarchy});
 
@@ -283,6 +283,9 @@ export class Tool {
             menu.addSeparator()
                 .addItem(item("vertical-three-dots", "Collapse tags at this level", () => toggle(true)))
                 .addItem(item("expand-vertically", "Expand tags at this level", () => toggle(false)));
+        }
+        if (tagName.contains('task/')) {
+            menu.addItem(item("pencil", "Complete #" + tagName, () => this.complete(tagName)));
         }
     }
 

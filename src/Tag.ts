@@ -50,7 +50,7 @@ export class Replacement {
         );
     }
 
-    async addToTodayNote(addLine:string){
+    async addToTodayNote(addLine:string,filepath:string){
         const pluginId = 'obsidian-open-file-by-magic-date';
         // @ts-ignore
         const magicDate = window.app.plugins.plugins[pluginId];
@@ -60,6 +60,9 @@ export class Replacement {
             return
         }
         const todayNotePath = magicDate.getTodayDailyNoteFile(false);// isyesterday
+        if (filepath == todayNotePath) {
+            return;
+        }
         // @ts-ignore
         const app:App = window.app;
         let dayliNoteFile = app.vault.getAbstractFileByPath(todayNotePath) as TFile;
@@ -77,7 +80,7 @@ export class Replacement {
         await app.vault.modify(dayliNoteFile, dayliNoteContent);
       }
 
-    inString(text, pos = 0, tag = null) {
+    inString(text, pos = 0, tag = null, filepath:string) {
         let addition = '';
         
         if (this.fromTag.name.length <= 3 && /zztest/.test(this.toTag.tag) ) {
@@ -99,7 +102,7 @@ export class Replacement {
             const formatStr = "YY/MM/DD HH:mm";
             const dayfmt = dayjs().format(formatStr);
             tagName = tagName.replace('#task/',`✅ `) + ` ${dayfmt} `;
-            this.addToTodayNote(tagName);
+            this.addToTodayNote(tagName,filepath);
             return text.slice(0, pos) + tagName + text.slice(pos + fromTagLen);
         }
         return text.slice(0, pos) + this.toTag.tag + addition + text.slice(pos + fromTagLen);
@@ -129,19 +132,19 @@ export class Replacement {
         });
     }
 
-    willMergeTags(tagNames) {
-        // Renaming to change case doesn't lose info, so ignore it
-        if (this.fromTag.canonical === this.toTag.canonical) return;
+    // willMergeTags(tagNames) {
+    //     // Renaming to change case doesn't lose info, so ignore it
+    //     if (this.fromTag.canonical === this.toTag.canonical) return;
 
-        const existing = new Set(tagNames.map(s => s.toLowerCase()));
+    //     const existing = new Set(tagNames.map(s => s.toLowerCase()));
 
-        for (const tagName of tagNames.filter(this.fromTag.matches)) {
-            const changed = this.inString(tagName);
-            if (existing.has(changed.toLowerCase()))
-                return [new Tag(tagName), new Tag(changed)];
-        }
+    //     for (const tagName of tagNames.filter(this.fromTag.matches)) {
+    //         const changed = this.inString(tagName);
+    //         if (existing.has(changed.toLowerCase()))
+    //             return [new Tag(tagName), new Tag(changed)];
+    //     }
 
-    }
+    // }
 }
 
 

@@ -1,6 +1,6 @@
 import { CST, parseDocument } from "yaml";
 import {Tag, Replacement} from "./Tag";
-import {Notice, parseFrontMatterAliases, parseFrontMatterTags} from "obsidian";
+import {Notice, TFile, parseFrontMatterAliases, parseFrontMatterTags} from "obsidian";
 
 export class File {
     app:any;
@@ -9,7 +9,7 @@ export class File {
     tagPositions:any;
     hasFrontMatter:boolean;
     stat:any;
-    file:any;
+    file:TFile;
     constructor(app, filename, tagPositions, hasFrontMatter) {
         this.app = app;
         this.filename = filename;
@@ -54,7 +54,7 @@ export class File {
         
         for ( const posi of this.tagPositions) {
             const { position: { start, end }, tag } = posi;
-            let theRep = null;
+            let theRep:Replacement = null;
             for (const rep of replaces) {
                 if (rep.fromTag.matches(tag)) {
                     theRep = rep;
@@ -71,7 +71,7 @@ export class File {
                 console.log(text.slice(start.offset, end.offset), posi , tag);
                 return false;
             }
-            text = theRep.inString(text,start.offset,tag);
+            text = theRep.inString(text,start.offset,tag,this.file.path);
         }
 
         if (this.hasFrontMatter)

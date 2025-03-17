@@ -16,12 +16,31 @@ export class TagSettingsTab extends PluginSettingTab {
                 this.plugin.saveSettings();
             });
         });
+
         new Setting(this.containerEl)
         .setName('获取数量为多少的标签')
         .addText(to =>{
+            to.setValue(`${this.plugin.settings.fromCount}`);
+            to.onChange(value => {
+                this.plugin.settings.fromCount = parseInt(value);
+                this.plugin.saveSettings();
+            });
+        }).addText(to =>{
             to.setValue(`${this.plugin.settings.tagoncount}`);
             to.onChange(value => {
                 this.plugin.settings.tagoncount = parseInt(value);
+                this.plugin.saveSettings();
+            });
+        })
+
+        new Setting(this.containerEl)
+        .setName('筛选的标签')
+        .setDesc('以,间隔开')
+        .addText(to =>{
+            to.setValue(this.plugin.settings.grepTag.join(','));
+            to.onChange(value => {
+                const arr = value.split(',').map(a => a.trim()).filter(a => a.length > 0);
+                this.plugin.settings.grepTag = arr;
                 this.plugin.saveSettings();
             });
         })

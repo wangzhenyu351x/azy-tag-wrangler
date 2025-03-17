@@ -32,8 +32,13 @@ export class Tool {
                 if (map[first] == 0) {
                     return false;
                 }
+                if (this.plugin.settings.grepTag.length > 0) {
+                    if (!this.plugin.settings.grepTag.contains(first)) {
+                        return false;
+                    }
+                }
             }
-            if (map[a] <= this.plugin.settings.tagoncount && map[a] >0 ) {
+            if (map[a] <= this.plugin.settings.tagoncount && map[a] > this.plugin.settings.fromCount ) {
                 return true;
             }
             return false;

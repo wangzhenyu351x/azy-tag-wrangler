@@ -21,12 +21,14 @@ import CChooseTagModal from "./zylib/CChooseTagModal";
 interface TagSettings {
     enableLevel2: boolean;
     tagoncount: number;
+    fromCount:number;
+    grepTag:string[];
 }
 
 export default class TagWrangler extends Plugin {
     // pageAliases = new Map();
     tagAliasInfo:TagAliasInfo = null;
-    settings: TagSettings = { enableLevel2: true, tagoncount: 1 };
+    settings: TagSettings = { enableLevel2: true, tagoncount: 1, fromCount:0, grepTag:[] };
     tool: Tool;
     isSelfClick:boolean = false;
     static tagPlugin: TagWrangler = null;
@@ -140,7 +142,13 @@ export default class TagWrangler extends Plugin {
                 hoverSource: tagHoverMain,
                 selector: ".tag-pane-tag",
                 container: ".tag-container",
-                toTag(el) { return el.find(".tag-pane-tag-text, tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text")?.textContent; }
+                toTag(el) {
+                    let tag = el.find(".tag-pane-tag-text, tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text")?.textContent;  
+                    if (tag.contains(' (')) {
+                        tag = tag.split(' (')[0];
+                    }
+                    return tag;
+                }
             })
         );
 
@@ -152,7 +160,13 @@ export default class TagWrangler extends Plugin {
                 hoverSource: null,
                 selector: ".memo-content-text .tag",
                 container: ".memolist-wrapper",
-                toTag(el: HTMLElement) { return el.textContent; }
+                toTag(el: HTMLElement) { 
+                     let tag = el.textContent; 
+                    if (tag.contains(' (')) {
+                        tag = tag.split(' (')[0];
+                    }
+                    return tag;
+                }
             })
         );
 
@@ -181,6 +195,9 @@ export default class TagWrangler extends Plugin {
                     }
                     for (let t = el.nextElementSibling; t?.matches("span.cm-hashtag:not(.cm-formatting)"); t = t.nextElementSibling) {
                         tagName += t.textContent;
+                    }
+                    if (tagName.contains(' (')) {
+                        tagName = tagName.split(' (')[0];
                     }
                     return tagName;
                 }
@@ -249,7 +266,7 @@ export default class TagWrangler extends Plugin {
                     // @ts-ignore
                     let tagtoDel = [];
                     if (tags['#task']) {
-                        tags['#task'] += 20000;
+                        tags['#task'] += 50;
                     }
                     for (const tagKey of names) {
                         if (tagKey.contains('/')) {
@@ -262,7 +279,7 @@ export default class TagWrangler extends Plugin {
                             const tagItem = '#' + arr[i];
                             // tags[tagItem] = tags[tagItem] + (i+1)*10000;
                             if (tagKey == tagItem && tags[tagKey] > 10) {
-                                tags[tagKey] += 10000;
+                                tags[tagKey] = 0;
                                 break;
                             }
 

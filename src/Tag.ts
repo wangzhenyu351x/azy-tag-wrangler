@@ -124,8 +124,10 @@ export class Replacement {
             if (this.cache[lc]) {
                 return this.cache[t] = this.cache[lc];
             } else if (lc.startsWith(this.fromTag.canonical_prefix)) {
+                //@ts-ignore
                 return this.cache[t] = this.cache[lc] = this.inString(t);
             } else if (("#" + lc).startsWith(this.fromTag.canonical_prefix)) {
+                //@ts-ignore
                 return this.cache[t] = this.cache[lc] = this.inString("#" + t).slice(1);
             }
             return this.cache[t] = this.cache[lc] = t;

@@ -325,53 +325,50 @@ export default class TagWrangler extends Plugin {
                 const tree = view?.tree;
                 const tagDoms = leaf?.view?.tagDoms;
                 if (tree && tagDoms && !hookTreeFlag) {
+                    tree.prefersCollapsed = true;
                     hookTreeFlag = true;
-                    // this.register(around(view, {
-                    //     updateTags(old){
-                    //         return function() {
-                    //             console.log('updateTags',arguments);
-                    //             // console.trace();
-                    //             return;
-                    //         }
-                    //     },
-                    //     setIsAllCollapsed(old) {
-                    //         return function() {
-                    //             console.log('setIsAllCollapsed',arguments);
-                    //             // console.trace();
-                    //             return;
-                    //         }
-                    //     }
-                    // }));
+                    this.register(around(Object.getPrototypeOf(view), {
+                        setUseHierarchy(old) {
+                            return function() {
+                                that.isSelfClick = true;
+                                old.apply(this,arguments);
+                                setTimeout(() => {
+                                    that.isSelfClick = false;
+                                }, 2000);
+                            }
+                        }
+                    }));
+                    this.register(around(view, {
+                        setUseHierarchy(old) {
+                            return function() {
+                                that.isSelfClick = true;
+                                old.apply(this,arguments);
+                                setTimeout(() => {
+                                    that.isSelfClick = false;
+                                }, 2000);
+                            }
+                        }
+                        
+                    }));
                     this.register(around(Object.getPrototypeOf(tree), {
-                        // setCollapseAll(old) {
-                        //     return function (isOpen) {
-                        //         console.log('setCollapseAll',arguments);
-                        //         console.trace();
-                        //         return;
-                        //         return old.call(this, isOpen);
-                        //     };
-                        // },
                         toggleCollapseAll(old) {
                             return function () {
-                                console.log('isAllCollapsed',this.isAllCollapsed);
-                                if (this.isAllCollapsed) {
-                                    return old.call(this);
-                                }
-                                // this.isAllCollapsed = false;
+                                that.isSelfClick = true;
+                                old.apply(this,arguments);
+                                that.isSelfClick = false;
                             };
                         },
                     }));
                     const dom = Object.values(tagDoms).first();
+                    let i =0;
                     this.register(around(Object.getPrototypeOf(dom), {
                         setCollapsed(old) {
                             return function (a,b) {
                                 if (!that.isSelfClick) {
+                                    // console.log('setCollapsed not SelfClick');
+                                    // console.trace();
                                     return;
                                 }
-                                // const stack = new Error().stack; // 这一步拦截
-                                // if (stack.includes('register.onElement.capture')) { 
-                                    
-                                // }
                                 if (!this.tag.contains('/')) {
                                     return old.call(this, a,b);
                                 }
@@ -381,32 +378,6 @@ export default class TagWrangler extends Plugin {
                             }
                         },
                     }));
-                    // const arr = ['tech', 'res', 't'];
-                    // let allOpen = true;
-                    // for (const item of arr) {
-                    //     const tagOri = '#'+item;
-                    //     const dom = view.tagDoms[tagOri];
-                    //     if (dom && dom.collapsible && dom.collapsed) {
-                    //         console.log(`${dom.tag} collapsed`);
-                    //         allOpen = false;
-                    //         break;
-                    //     }
-                    // }
-
-                    
-                    // if (allOpen) {
-                    //     console.log('all open');
-                    //     this.isSelfClick = true;
-                    //     // tree.toggleCollapseAll();
-                    //     tree.prefersCollapsed = true;
-                    //     tree.isAllCollapsed = true;
-                    //     view?.requestUpdateTags?.();
-                    //     setTimeout(() => {
-                    //         this.isSelfClick = false;
-                    //     }, 2000);
-                    // }
-                    // if (!tree.isAllCollapsed) {
-                    // }
                 }
             });
         });

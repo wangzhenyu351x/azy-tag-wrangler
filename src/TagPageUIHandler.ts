@@ -69,9 +69,11 @@ export class TagPageUIHandler extends Component {
                                 // 关闭打开选项.
                                 if (this.plugin.settings.enableLevel2) {
                                     tag.setCollapsed(!tag.collapsed);
+                                    tag.tree.requestSaveFolds();
                                 }
                             } else {
                                 tag.setCollapsed(!tag.collapsed);
+                                tag.tree.requestSaveFolds();
                             }
                             
                         }

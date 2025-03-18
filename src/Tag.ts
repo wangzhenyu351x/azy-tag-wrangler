@@ -101,7 +101,7 @@ export class Replacement {
             }
             const formatStr = "YY/MM/DD HH:mm";
             const dayfmt = dayjs().format(formatStr);
-            tagName = tagName.replace('#task/',`✅ `) + ` ${dayfmt} `;
+            tagName = tagName.replace('#task/',`✅ task/`) + ` ${dayfmt} `;
             this.addToTodayNote(tagName,filepath);
             return text.slice(0, pos) + tagName + text.slice(pos + fromTagLen);
         }

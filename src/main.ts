@@ -265,11 +265,18 @@ export default class TagWrangler extends Plugin {
                     // @ts-ignore
                     // @ts-ignore
                     let tagtoDel = [];
-                    if (tags['#task']) {
-                        tags['#task'] += 50;
-                    }
                     for (const tagKey of names) {
                         if (tagKey.contains('/')) {
+                            
+                            if (tagKey.startsWith('#task')) {
+                                const lat = tagKey.split('/').pop();
+                                const latn = parseInt(lat);
+                                if (latn && latn > 0) {
+                                    // console.log(latn,tagKey);
+                                    tags[tagKey] += 10 - latn;
+                                }
+                                
+                            }
                             continue;
                         }
                         // @ts-ignore
@@ -284,6 +291,11 @@ export default class TagWrangler extends Plugin {
                             }
 
                         }
+                    }
+                    if (tags['#task']) {
+                        tags['#task'] += 1000;
+                        tags['#task/剪刀'] = 1;
+                        tags['#task/布'] = 0;
                     }
                     // for (const tagKey of tagtoDel) {
                     //     delete tags[tagKey];
@@ -342,7 +354,7 @@ export default class TagWrangler extends Plugin {
                 const tree = view?.tree;
                 const tagDoms = leaf?.view?.tagDoms;
                 if (tree && tagDoms && !hookTreeFlag) {
-                    tree.prefersCollapsed = true;
+                    tree.prefersCollapsed = false;
                     hookTreeFlag = true;
                     this.register(around(Object.getPrototypeOf(view), {
                         setUseHierarchy(old) {

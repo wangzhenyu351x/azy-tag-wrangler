@@ -55,5 +55,14 @@ export class TagSettingsTab extends PluginSettingTab {
                     this.plugin.saveSettings();
                 });
             })
+        new Setting(this.containerEl)
+            .setName('仅筛选二级以上')
+            .addToggle(to => {
+                to.setValue(this.plugin.settings.onlyLevel2);
+                to.onChange(value => {
+                    this.plugin.settings.onlyLevel2 = value;
+                    this.plugin.saveSettings();
+                });
+            })
     }
 }

@@ -25,12 +25,13 @@ interface TagSettings {
     fromCount:number;
     grepTag:string[];
     tagCountSolo:boolean;
+    onlyLevel2:boolean;
 }
 
 export default class TagWrangler extends ZYPlugin {
     // pageAliases = new Map();
     tagAliasInfo:TagAliasInfo = null;
-    settings: TagSettings = { enableLevel2: true, tagoncount: 1, fromCount:0, grepTag:[], tagCountSolo:true };
+    settings: TagSettings = { enableLevel2: true, tagoncount: 1, fromCount:0, grepTag:[], tagCountSolo:true ,onlyLevel2:false };
     tool: Tool;
     isSelfClick:boolean = false;
     static tagPlugin: TagWrangler = null;
@@ -259,6 +260,8 @@ export default class TagWrangler extends ZYPlugin {
             // 修改tag数量
             // @ts-ignore
             getTags(old) {
+                // @ts-ignore
+                metaCache.getTagsOld = old;
                 return function getTags() {
                     const tags = old.call(this);
                     const names = Object.keys(tags); // .map(t => t.toLowerCase()));

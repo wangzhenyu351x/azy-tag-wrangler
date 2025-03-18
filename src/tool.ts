@@ -53,14 +53,18 @@ export class Tool {
         await this.waitOneSecond();
 
         // @ts-ignore
-        const map = this.app.metadataCache.getTags();
+        const map = this.app.metadataCache.getTagsOld();
         const tagArr = Object.keys(map).filter(a => {
             if (this.plugin.settings.tagoncount < 1) {
                 return true;
             }
             if (a.contains('/')) {
-                const first = a.split('/')[0];
+                const arr = a.split('/');
+                const first = arr[0];
                 if (map[first] == 0) {
+                    return false;
+                }
+                if (this.plugin.settings.onlyLevel2 && arr.length > 2) {
                     return false;
                 }
                 if (this.plugin.settings.grepTag.length > 0) {

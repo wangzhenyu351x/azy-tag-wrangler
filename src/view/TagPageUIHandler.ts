@@ -3,7 +3,7 @@ import {
     Keymap,
     Plugin
 } from "obsidian";
-import TagWrangler from "./main";
+import TagWrangler from "../main";
 
 interface TagUIFace {
     container:string,

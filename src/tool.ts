@@ -1,11 +1,11 @@
 import { App, Keymap, MarkdownView, Menu, Notice, Scope, TFile, TFolder, getLinkpath, iterateCacheRefs } from "obsidian";
 import TagWrangler from "./main";
-import { completeTag, moveToFolder, promptForAliasName, renameTag, renameTagWith } from "./renaming";
-import { Replacement, Tag } from "./Tag";
+import { completeTag, moveToFolder, promptForAliasName, renameTag, renameTagWith } from "./component/renaming";
+import { Replacement, Tag } from "./component/Tag";
 import dayjs from "dayjs";
-import { AliasInfo } from "./TagAliasInfo";
+import { AliasInfo } from "./component/TagAliasInfo";
 import { String, trim } from "lodash";
-import { EnterTagsModal } from "./EnterTagsModal";
+import { EnterTagsModal } from "./view/EnterTagsModal";
 import CChooseTagModal from "./zylib/CChooseTagModal";
 
 export class Tool {

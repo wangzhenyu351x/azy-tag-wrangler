@@ -1,10 +1,10 @@
 import {confirm} from "smalltalk";
 import {Progress} from "./progress";
-import {validatedInput} from "./validation";
+import {validatedInput} from "src/view/validation";
 import {Notice, parseFrontMatterAliases, parseFrontMatterTags, normalizePath} from "obsidian";
 import {Tag, Replacement} from "./Tag";
 import {File} from "./File";
-import TagWrangler from "./main";
+import TagWrangler from "../main";
 export const kCptTag = '_zycpt';
 export async function renameTagWith(app, arr, selectHalf = false , getFileName = false) {
     for (const repl of arr) {

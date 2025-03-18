@@ -14,8 +14,8 @@ import {
 	Setting,
 	TFile,
 } from "obsidian";
-import TagWrangler from "./main";
-import { AliasInfo } from "./TagAliasInfo";
+import TagWrangler from "../main";
+import { AliasInfo } from "../component/TagAliasInfo";
 
 const escapeRegExp = (str: string) => {
 	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& = the whole matched string

@@ -8,11 +8,11 @@ import {
     TFile, TFolder, MarkdownView, iterateCacheRefs, getLinkpath, normalizePath,
     Notice
 } from "obsidian";
-import { EnterTagsModal } from "./EnterTagsModal";
-import { Tag, Replacement } from "./Tag";
-import { TagAliasInfo } from "./TagAliasInfo";
-import { TagEditorSuggest } from "./TagEditorSuggest";
-import { TagPageUIHandler, onElement } from "./TagPageUIHandler";
+import { EnterTagsModal } from "./view/EnterTagsModal";
+import { Tag, Replacement } from "./component/Tag";
+import { TagAliasInfo } from "./component/TagAliasInfo";
+import { TagEditorSuggest } from "./view/TagEditorSuggest";
+import { TagPageUIHandler, onElement } from "./view/TagPageUIHandler";
 import { around } from "monkey-around";
 import { TagSettingsTab } from "./TagSettingTab";
 import { Tool, execCmdString } from "./tool";

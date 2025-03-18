@@ -134,6 +134,23 @@ export class Tool {
         return content;
     }
 
+    myechoMap(map: any, level = 0, prefixStr = '#') {
+        let content = '';
+        for (const key of map.keys()) {
+            let curFix = prefixStr;
+            const innerMap = map.get(key);
+            let curString = '# ';
+            for (let i = 0; i < level; i++) {
+                curString = '#' + curString;
+            }
+            content += `${curFix}${key}\n`;
+            curFix = `${curFix}${key}/`;
+            const res = this.echoMap(innerMap, level + 1, curFix);
+            content += res;
+        }
+        return content;
+    }
+
     async createContentPage(content: string, baseName: string) {
         let path = `${baseName}.md`;
         if ("MapFolder" == this.app.vault.getName()) {

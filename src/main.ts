@@ -24,12 +24,13 @@ interface TagSettings {
     tagoncount: number;
     fromCount:number;
     grepTag:string[];
+    tagCountSolo:boolean;
 }
 
 export default class TagWrangler extends ZYPlugin {
     // pageAliases = new Map();
     tagAliasInfo:TagAliasInfo = null;
-    settings: TagSettings = { enableLevel2: true, tagoncount: 1, fromCount:0, grepTag:[] };
+    settings: TagSettings = { enableLevel2: true, tagoncount: 1, fromCount:0, grepTag:[], tagCountSolo:true };
     tool: Tool;
     isSelfClick:boolean = false;
     static tagPlugin: TagWrangler = null;
@@ -260,47 +261,57 @@ export default class TagWrangler extends ZYPlugin {
             getTags(old) {
                 return function getTags() {
                     const tags = old.call(this);
-                    const names = new Set(Object.keys(tags)); // .map(t => t.toLowerCase()));
-                    const arr = ['tech', 'res', 't'];
+                    const names = Object.keys(tags); // .map(t => t.toLowerCase()));
+                    names.sort((a,b)=> {
+                        return b.length - a.length;
+                    });
 
-                    // @ts-ignore
-                    // @ts-ignore
-                    let tagtoDel = [];
+                    // let rootTagMap = new Map();
+                    // for (const tagItem of names) {
+                    //     let itemArr = tagItem.split('/');
+                    //     let curTag = itemArr[0];
+                    //     let curTagMap = rootTagMap;
+                    //     while (itemArr.length > 0) {
+                    //         curTag = itemArr[0];
+                    //         if (!curTagMap.has(curTag)) {
+                    //             curTagMap.set(curTag, new Map());
+                    //         }
+                    //         itemArr = itemArr.slice(1);
+                    //         curTagMap = curTagMap.get(curTag);
+                    //     }
+                    // }
+
+                    const arr = ['tech', 'res', 't'];
                     for (const tagKey of names) {
                         if (tagKey.contains('/')) {
-                            
+                            if (that.settings.tagCountSolo) {
+                                const arr = tagKey.split('/');
+                                arr.pop();
+                                const faKey = arr.join('/');
+                                tags[faKey] -= tags[tagKey];
+                            }
                             if (tagKey.startsWith('#task')) {
                                 const lat = tagKey.split('/').pop();
                                 const latn = parseInt(lat);
                                 if (latn && latn > 0) {
-                                    // console.log(latn,tagKey);
                                     tags[tagKey] += 10 - latn;
                                 }
-                                
                             }
-                            continue;
                         }
-                        // @ts-ignore
-                        // @ts-ignore
-                        let isMark = false;
-                        for (let i = 0; i < arr.length; i++) {
-                            const tagItem = '#' + arr[i];
-                            // tags[tagItem] = tags[tagItem] + (i+1)*10000;
-                            if (tagKey == tagItem && tags[tagKey] > 10) {
-                                tags[tagKey] = 0;
-                                break;
-                            }
-
+                    }
+                    for (let i = 0; i < arr.length; i++) {
+                        const tagItem = '#' + arr[i];
+                        if (tags[tagItem] && tags[tagItem] > 10) {
+                            tags[tagItem] = 0;
                         }
                     }
                     if (tags['#task']) {
                         tags['#task'] += 1000;
+                        tags['#task/石头'] = 2;
                         tags['#task/剪刀'] = 1;
                         tags['#task/布'] = 0;
                     }
-                    // for (const tagKey of tagtoDel) {
-                    //     delete tags[tagKey];
-                    // }
+
                     return tags;
                 };
             }

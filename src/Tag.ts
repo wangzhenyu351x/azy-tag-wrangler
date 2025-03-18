@@ -71,6 +71,12 @@ export class Replacement {
           dayliNoteFile = await app.vault.create(todayNotePath, '');
         }
         let dayliNoteContent = await app.vault.read(dayliNoteFile);
+        if (addLine.contains('task/')) {
+            const lastline = addLine.split('task/').pop();
+            if (dayliNoteContent.contains(lastline)) {
+                return;
+            }
+        }
         const kSeperateLine = '++++++\n';
         const kPaddingStr = ' \n\n';
         if (!dayliNoteContent.contains(kSeperateLine)) {

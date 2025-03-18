@@ -34,15 +34,26 @@ export class TagSettingsTab extends PluginSettingTab {
         })
 
         new Setting(this.containerEl)
-        .setName('筛选的标签')
-        .setDesc('以,间隔开')
-        .addText(to =>{
-            to.setValue(this.plugin.settings.grepTag.join(','));
-            to.onChange(value => {
-                const arr = value.split(',').map(a => a.trim()).filter(a => a.length > 0);
-                this.plugin.settings.grepTag = arr;
-                this.plugin.saveSettings();
-            });
-        })
+            .setName('筛选的标签')
+            .setDesc('以,间隔开')
+            .addText(to =>{
+                to.setValue(this.plugin.settings.grepTag.join(','));
+                to.onChange(value => {
+                    const arr = value.split(',').map(a => a.trim()).filter(a => a.length > 0);
+                    this.plugin.settings.grepTag = arr;
+                    this.plugin.saveSettings();
+                });
+            })
+
+        new Setting(this.containerEl)
+            .setName('标签数量不包括子标签')
+            .setDesc('默认包括')
+            .addToggle(to => {
+                to.setValue(this.plugin.settings.tagCountSolo);
+                to.onChange(value => {
+                    this.plugin.settings.tagCountSolo = value;
+                    this.plugin.saveSettings();
+                });
+            })
     }
 }

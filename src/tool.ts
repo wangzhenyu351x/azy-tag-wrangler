@@ -5,6 +5,8 @@ import { Replacement, Tag } from "./Tag";
 import dayjs from "dayjs";
 import { AliasInfo } from "./TagAliasInfo";
 import { String, trim } from "lodash";
+import { EnterTagsModal } from "./EnterTagsModal";
+import CChooseTagModal from "./zylib/CChooseTagModal";
 
 export class Tool {
     constructor(private app:App,private plugin:TagWrangler) {
@@ -12,6 +14,35 @@ export class Tool {
 
     async waitOneSecond() {
         return new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    async getSearchResult() {
+        // this.app.workspace.containerEl;
+        
+        const fileNameList = window.document.querySelectorAll(".search-result-container.mod-global-search .search-result-file-title .tree-item-inner");
+        let fileList:TFile[] = [];
+        for (const fileDom of fileNameList) {
+            const source = fileDom.textContent.trim();
+            const file = this.app.metadataCache.getFirstLinkpathDest(source,'');
+            if (file && file.path.endsWith('.md')) {
+                fileList.push(file);
+            } else {
+                console.log(`${source} 没有找到对应的md文件`);
+            }
+        }
+        if (fileList.length == 0) {
+            new Notice('没有找到合格文件.');
+            return;
+        }
+        new CChooseTagModal(this.app).awaitSelection().then((res:string) =>{
+            // new Notice(res);
+            for (const file of fileList) {
+                this.addTagToFile(res,file);   
+            }
+        }).catch(reason => {
+            console.log(`cancel ${reason}`);
+        });
+
     }
 
     async getTagTree(echoTree:boolean = true) {
@@ -304,6 +335,40 @@ export class Tool {
     }
 
     // tags: string[], folder: TFolder, includeSubfolders: boolean, counter: number[] = [0]) 
+    async addTagToFile(tag,file:TFile) {
+        const note = file;
+        let linkStr = tag;
+        // '#' + tags.first();
+        if (!linkStr.startsWith('#')) {
+            linkStr = '#'+linkStr.trim();
+        }
+        let content = await this.app.vault.read(file);
+        if (!content.contains(linkStr)) {
+            const fcache = this.app.metadataCache.getFileCache(note);
+            if (fcache && fcache.frontmatter) {
+                let contArr = content.split('\n');
+                let lineNo = -1;
+                let i = 0;
+                for (const line of contArr) {
+                    if (line.startsWith('---') && line.trim() === '---') {
+                        lineNo = i;
+                    }
+                    i++;
+                }
+                if (lineNo >= 0) {
+                    contArr.splice(lineNo + 1, 0, linkStr);
+                } else {
+                    contArr.push(linkStr);
+                }
+                content = contArr.join('\n');
+            } else {
+                if (!content.contains(linkStr)) {
+                    content = `${linkStr}\n${content}`;
+                }
+            }
+            await this.app.vault.modify(note, content);
+        }
+    }
     async addTagsToNotes(tags, folder, includeSubfolders, counter = [0]) {
         for (const note of folder.children) {
             if (note instanceof TFolder) {
@@ -321,34 +386,7 @@ export class Tool {
             // 	}
             // })
             const file = note; //as TFile;
-
-            const linkStr = '#' + tags.first();
-            let content = await this.app.vault.read(file);
-            if (!content.contains(linkStr)) {
-                const fcache = this.app.metadataCache.getFileCache(note);
-                if (fcache && fcache.frontmatter) {
-                    let contArr = content.split('\n');
-                    let lineNo = -1;
-                    let i = 0;
-                    for (const line of contArr) {
-                        if (line.startsWith('---') && line.trim() === '---') {
-                            lineNo = i;
-                        }
-                        i++;
-                    }
-                    if (lineNo >= 0) {
-                        contArr.splice(lineNo + 1, 0, linkStr);
-                    } else {
-                        contArr.push(linkStr);
-                    }
-                    content = contArr.join('\n');
-                } else {
-                    if (!content.contains(linkStr)) {
-                        content = `${linkStr}\n${content}`;
-                    }
-                }
-                await this.app.vault.modify(note, content);
-            }
+            await this.addTagToFile(tags.first(),file);
             counter[0]++;
         }
     }

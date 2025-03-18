@@ -17,6 +17,7 @@ import { around } from "monkey-around";
 import { TagSettingsTab } from "./TagSettingTab";
 import { Tool, execCmdString } from "./tool";
 import CChooseTagModal from "./zylib/CChooseTagModal";
+import { ZYPlugin } from "./zylib/CommonTool";
 
 interface TagSettings {
     enableLevel2: boolean;
@@ -25,7 +26,7 @@ interface TagSettings {
     grepTag:string[];
 }
 
-export default class TagWrangler extends Plugin {
+export default class TagWrangler extends ZYPlugin {
     // pageAliases = new Map();
     tagAliasInfo:TagAliasInfo = null;
     settings: TagSettings = { enableLevel2: true, tagoncount: 1, fromCount:0, grepTag:[] };
@@ -37,10 +38,6 @@ export default class TagWrangler extends Plugin {
         super(app, manifest);
         this.tagAliasInfo = new TagAliasInfo(app, this);
         this.tool = new Tool(app, this);
-    }
-
-    saveSettings() {
-        this.saveData(this.settings);
     }
 
     onunload(): void {
@@ -85,6 +82,10 @@ export default class TagWrangler extends Plugin {
             name: "Delete file with its link",
             callback: () => this.tool.deleteFileAndItsLink(),
         });
+
+        this.addCmd('get search result',() => {
+            this.tool.getSearchResult();
+        })
 
         this.addCommand({
             id: "choose tag",

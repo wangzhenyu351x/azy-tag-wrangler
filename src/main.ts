@@ -26,12 +26,13 @@ interface TagSettings {
     grepTag:string[];
     tagCountSolo:boolean;
     onlyLevel2:boolean;
+    tagSuggestSortDESC:boolean;
 }
 
 export default class TagWrangler extends ZYPlugin {
     // pageAliases = new Map();
     tagAliasInfo:TagAliasInfo = null;
-    settings: TagSettings = { enableLevel2: true, tagoncount: 1, fromCount:0, grepTag:[], tagCountSolo:true ,onlyLevel2:false };
+    settings: TagSettings = { enableLevel2: true, tagoncount: 1, fromCount:0, grepTag:[], tagCountSolo:true ,onlyLevel2:false ,tagSuggestSortDESC:true };
     tool: Tool;
     isSelfClick:boolean = false;
     static tagPlugin: TagWrangler = null;

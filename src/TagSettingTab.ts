@@ -64,5 +64,15 @@ export class TagSettingsTab extends PluginSettingTab {
                     this.plugin.saveSettings();
                 });
             })
+
+        new Setting(this.containerEl)
+            .setName('标签提示数量倒序')
+            .addToggle(to => {
+                to.setValue(this.plugin.settings.tagSuggestSortDESC);
+                to.onChange(value => {
+                    this.plugin.settings.tagSuggestSortDESC = value;
+                    this.plugin.saveSettings();
+                });
+            })
     }
 }

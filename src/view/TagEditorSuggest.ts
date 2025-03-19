@@ -186,6 +186,9 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 			const aIx = a.type.indexOf(originString);
 			const bIx = b.type.indexOf(originString);
 			if (bIx == aIx) {
+				if (this.plugin.settings.tagSuggestSortDESC) {
+					return b.num - a.num;
+				}
 				return  a.num -b.num;
 			} else {
 				return aIx - bIx;

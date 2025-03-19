@@ -285,7 +285,7 @@ export default class TagWrangler extends ZYPlugin {
                     //     }
                     // }
 
-                    
+                    let childMap = {};
                     for (const tagKey of names) {
                         if (tagKey.contains('/')) {
                             if (that.settings.tagCountSolo) {
@@ -293,6 +293,11 @@ export default class TagWrangler extends ZYPlugin {
                                 arr.pop();
                                 const faKey = arr.join('/');
                                 tags[faKey] -= tags[tagKey];
+                                if (childMap[faKey]) {
+                                    childMap[faKey] += 1;
+                                } else {
+                                    childMap[faKey] = 1;
+                                }
                             }
                             if (tagKey.startsWith('#task')) {
                                 const lat = tagKey.split('/').pop();
@@ -303,12 +308,21 @@ export default class TagWrangler extends ZYPlugin {
                             }
                         }
                     }
+
+                    if (that.settings.tagCountSolo) {
+                        const keys = Object.keys(childMap);
+                        for (const key of keys) {
+                            if (childMap[key] > 10) {
+                                tags[key] = -childMap[key] + 10;
+                            }
+                        }
+                    }
                     
                     let arr = ['#tech', '#res', '#t'];
                     this.ignoreTags = arr.concat(['#task']);
                     for (let i = 0; i < arr.length; i++) {
                         const tagItem = arr[i];
-                        if (tags[tagItem] && tags[tagItem] > 10) {
+                        if (tags[tagItem] && (tags[tagItem] > 10 || tags[tagItem] < 0)) {
                             tags[tagItem] = 0;
                         }
                     }

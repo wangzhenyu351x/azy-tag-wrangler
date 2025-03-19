@@ -136,10 +136,18 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 				const aliasInfo:AliasInfo = dict[keyTag];
 				if (aliasInfo.alias) {
 					for (const value of aliasInfo.alias) {
-						if(value.contains(filterString) && (!lastPart || value.contains(lastPart))) {
-							tmp.push({type:value, num:tagsMap[keyTag], origin:keyTag});
-							aliases.push(`${keyTag}`);
-							// console.log(keyTag,originString,value);
+						if (lastPart) {
+							if(keyTag.contains(filterString) && value.contains(lastPart)) {
+								tmp.push({type:value, num:tagsMap[keyTag], origin:keyTag});
+								aliases.push(`${keyTag}`);
+								// console.log(keyTag,originString,value);
+							}
+						} else {
+							if(value.contains(filterString)) {
+								tmp.push({type:value, num:tagsMap[keyTag], origin:keyTag});
+								aliases.push(`${keyTag}`);
+								// console.log(keyTag,originString,value);
+							}
 						}
 					}
 				}

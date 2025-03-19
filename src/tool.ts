@@ -317,6 +317,12 @@ export class Tool {
             menu.addItem(
                 item("magnifying-glass", "New search for #" + tagName, () => search.openGlobalSearch("tag:" + tagName))
             );
+            menu.addItem(
+                item("magnifying-glass", "search father only for #" + tagName, () => {
+                    const inner = tagName.replace('/','\\/');
+                    search.openGlobalSearch(`/${inner}\\s/`)
+                })
+            );
         }
         menu.addItem(item("pencil", "Rename #" + tagName, () => this.rename(tagName)));
         menu.addSeparator();

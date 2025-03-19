@@ -114,11 +114,11 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 	}
 
     getSuggestions(context: EditorSuggestContext): TagFace[]{
-		const originString = context.query.trim();
+		const originString = context.query.trim().toLowerCase();
 		let filterString = originString;
 		// const searchCallback = prepareFuzzySearch(filterString);
 		// const queryWords = filterString;
-		let tmp = [];
+		let tmp:TagFace[] = [];
 		// @ts-ignore
 		const tagsMap:any = this.tagsMap;
 		const arr:string[] = [...Object.keys(tagsMap)];
@@ -145,27 +145,25 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 				}
 			}
 		}
-		for (const item of arr) {
-			if (tagsMap[item] > 1000) {
+
+		let secondList:TagFace[] = [];
+		for (const itemOri of arr) {
+			if (tagsMap[itemOri] > 1000) {
 				continue;
 			}
-			let item2 = item.toLowerCase();
-			if (item2 == item) {
-				item2 = null;
-			}
-			if(item.contains(filterString) && (!lastPart || item.contains(lastPart))
-				|| (item2 && item2.contains(filterString) && (!lastPart || item2.contains(lastPart)))
-			) {
-				tmp.push({type:item, num:tagsMap[item], origin:null});
-			} else {
+			const item = itemOri.toLowerCase();
+			if(item.contains(filterString) && (!lastPart || (item.contains(lastPart)))) {
+				tmp.push({type:itemOri, num:tagsMap[itemOri], origin:null});
+			} else if (lastPart && item.endsWith(filterString)) {
+				secondList.push({type:itemOri, num:tagsMap[itemOri], origin:null});
+			} else  {
 				for (const alias of aliases) {
-					if (item.startsWith(alias) && item != alias) {
-						tmp.push({type:item, num:tagsMap[item], origin:null});
+					if (itemOri.startsWith(alias) && itemOri != alias) {
+						tmp.push({type:itemOri, num:tagsMap[itemOri], origin:null});
 					}
 				}
 			}
 		}
-
 		// if (tmp.length == 1 && tmp[0].type == filterString) {
 		// 	tmp = [];
 		// }
@@ -176,15 +174,17 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 			// if (!b.origin && a.origin) {
 			// 	return -1;
 			// }
+			const atype = a.type.toLowerCase();
+			const btype = b.type.toLowerCase();
 			
-			if (compare2Tag(a.type,originString) || compare2Tag(a.type ,lastPart)) {
-				return -1;
-			}
-			if (compare2Tag(b.type ,originString)  ||compare2Tag(b.type ,lastPart)) {
-				return 1;
-			}
-			const aIx = a.type.indexOf(originString);
-			const bIx = b.type.indexOf(originString);
+			// if ((atype == originString) || (atype == lastPart)) {
+			// 	return -1;
+			// }
+			// if ((btype == originString)  || (btype ==lastPart)) {
+			// 	return 1;
+			// }
+			const aIx = atype.indexOf(originString);
+			const bIx = btype.indexOf(originString);
 			if (bIx == aIx) {
 				if (this.plugin.settings.tagSuggestSortDESC) {
 					return b.num - a.num;
@@ -196,7 +196,13 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 		});
 		// console.log(filterString,tmp);
 		if(tmp.length == 0) {
-			tmp.push({type:'新建', num:0, origin:originString});
+			if (secondList.length > 0) {
+				for (const item of secondList) {
+					tmp.push({type:'新建', num:0, origin:item.type + '/' + lastPart});		
+				}
+			} else {
+				tmp.push({type:'新建', num:0, origin:originString});
+			}
 		}
         return tmp;
     }

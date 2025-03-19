@@ -285,7 +285,7 @@ export default class TagWrangler extends ZYPlugin {
                     //     }
                     // }
 
-                    const arr = ['tech', 'res', 't'];
+                    
                     for (const tagKey of names) {
                         if (tagKey.contains('/')) {
                             if (that.settings.tagCountSolo) {
@@ -303,8 +303,11 @@ export default class TagWrangler extends ZYPlugin {
                             }
                         }
                     }
+                    
+                    let arr = ['#tech', '#res', '#t'];
+                    this.ignoreTags = arr.concat(['#task']);
                     for (let i = 0; i < arr.length; i++) {
-                        const tagItem = '#' + arr[i];
+                        const tagItem = arr[i];
                         if (tags[tagItem] && tags[tagItem] > 10) {
                             tags[tagItem] = 0;
                         }

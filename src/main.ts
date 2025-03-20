@@ -270,50 +270,35 @@ export default class TagWrangler extends ZYPlugin {
                         return b.length - a.length;
                     });
 
-                    // let rootTagMap = new Map();
-                    // for (const tagItem of names) {
-                    //     let itemArr = tagItem.split('/');
-                    //     let curTag = itemArr[0];
-                    //     let curTagMap = rootTagMap;
-                    //     while (itemArr.length > 0) {
-                    //         curTag = itemArr[0];
-                    //         if (!curTagMap.has(curTag)) {
-                    //             curTagMap.set(curTag, new Map());
-                    //         }
-                    //         itemArr = itemArr.slice(1);
-                    //         curTagMap = curTagMap.get(curTag);
-                    //     }
-                    // }
-
                     let childMap = {};
                     for (const tagKey of names) {
                         if (tagKey.contains('/')) {
+                            const arr = tagKey.split('/');
+                            arr.pop();
+                            const faKey = arr.join('/');
                             if (that.settings.tagCountSolo) {
-                                const arr = tagKey.split('/');
-                                arr.pop();
-                                const faKey = arr.join('/');
                                 tags[faKey] -= tags[tagKey];
-                                if (childMap[faKey]) {
-                                    childMap[faKey] += 1;
-                                } else {
-                                    childMap[faKey] = 1;
-                                }
                             }
-                            if (tagKey.startsWith('#task')) {
-                                const lat = tagKey.split('/').pop();
-                                const latn = parseInt(lat);
-                                if (latn && latn > 0) {
-                                    tags[tagKey] += 10 - latn;
-                                }
+                            if (childMap[faKey]) {
+                                childMap[faKey] += 1;
+                            } else {
+                                childMap[faKey] = 1;
                             }
+                            // if (tagKey.startsWith('#task')) {
+                            //     const lat = tagKey.split('/').pop();
+                            //     const latn = parseInt(lat);
+                            //     if (latn && latn > 0) {
+                            //         tags[tagKey] += 10 - latn;
+                            //     }
+                            // }
                         }
                     }
                     
                     if (tags['#task']) {
-                        tags['#task'] += 1000;
-                        tags['#task/石头'] = 2;
-                        tags['#task/剪刀'] = 1;
-                        tags['#task/布'] = 0;
+                        tags['#task'] += 10000;
+                        tags['#task/石头'] += 20;
+                        tags['#task/剪刀'] += 10;
+                        // tags['#task/布'] = 0;
                     }
 
                     const folderLimit = 10;

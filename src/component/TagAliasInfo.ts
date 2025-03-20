@@ -110,10 +110,16 @@ export class TagAliasInfo {
 
 		let oriConnt = await this.app.vault.read(file);
 		const parts = oriConnt.split('---\n');
-		parts.pop();
+		const lat = parts.pop();
 
 		let content = '';
 		const keys = Object.keys(this.tagInfo).sort();
+		const oriCount = lat.split('#').length -1;
+		if (keys.length < oriCount -1) {
+			new Notice('出问题了');
+			console.error('taginfo修改bug',this.tagInfo,lat);
+			return;
+		}
 		for (const key of keys) {
 			const info = this.tagInfo[key];
 			if (info.alias) {

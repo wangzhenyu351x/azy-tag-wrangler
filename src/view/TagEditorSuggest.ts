@@ -172,36 +172,7 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 				}
 			}
 		}
-		// if (tmp.length == 1 && tmp[0].type == filterString) {
-		// 	tmp = [];
-		// }
-		tmp.sort((a,b) => {
-			// if (!a.origin && b.origin) {
-			// 	return 1;
-			// }
-			// if (!b.origin && a.origin) {
-			// 	return -1;
-			// }
-			const atype = a.type.toLowerCase();
-			const btype = b.type.toLowerCase();
-			
-			// if ((atype == originString) || (atype == lastPart)) {
-			// 	return -1;
-			// }
-			// if ((btype == originString)  || (btype ==lastPart)) {
-			// 	return 1;
-			// }
-			const aIx = atype.indexOf(originString);
-			const bIx = btype.indexOf(originString);
-			if (bIx == aIx) {
-				if (this.plugin.settings.tagSuggestSortDESC) {
-					return b.num - a.num;
-				}
-				return  a.num -b.num;
-			} else {
-				return aIx - bIx;
-			}
-		});
+		
 		// console.log(filterString,tmp);
 		if(tmp.length == 0) {
 			if (secondList.length > 0) {
@@ -212,6 +183,33 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 				tmp.push({type:'新建', num:0, origin:originString});
 			}
 		}
+
+		const sortFn = (a,b) => {
+			const atype = a.type.toLowerCase();
+			const btype = b.type.toLowerCase();
+			
+			if (lastPart) {
+				if (atype.contains(lastPart) && !btype.contains(lastPart)) {
+					return -1;
+				}
+				if (btype.contains(lastPart) && !atype.contains(lastPart)) {
+					return 1;
+				}
+			}
+
+			const aIx = atype.indexOf(originString);
+			const bIx = btype.indexOf(originString);
+			if (bIx == aIx) {
+				if (this.plugin.settings.tagSuggestSortDESC) {
+					return b.num - a.num;
+				}
+				return  a.num -b.num;
+			} else {
+				return aIx - bIx;
+			}
+		};
+		tmp.sort(sortFn);
+
         return tmp;
     }
 

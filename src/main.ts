@@ -308,16 +308,22 @@ export default class TagWrangler extends ZYPlugin {
                             }
                         }
                     }
+                    
+                    if (tags['#task']) {
+                        tags['#task'] += 1000;
+                        tags['#task/石头'] = 2;
+                        tags['#task/剪刀'] = 1;
+                        tags['#task/布'] = 0;
+                    }
 
-                    if (that.settings.tagCountSolo) {
-                        const keys = Object.keys(childMap);
-                        for (const key of keys) {
-                            if (childMap[key] > 10) {
-                                tags[key] = -childMap[key] + 10;
-                            }
+                    const folderLimit = 10;
+                    const keys = Object.keys(childMap);
+                    for (const key of keys) {
+                        if (childMap[key] > folderLimit) {
+                            tags[key] += (childMap[key] -folderLimit) * 1000;
                         }
                     }
-                    
+
                     let arr = ['#tech', '#res', '#t'];
                     this.ignoreTags = arr.concat(['#task']);
                     for (let i = 0; i < arr.length; i++) {
@@ -325,12 +331,6 @@ export default class TagWrangler extends ZYPlugin {
                         if (tags[tagItem] && (tags[tagItem] > 10 || tags[tagItem] < 0)) {
                             tags[tagItem] = 0;
                         }
-                    }
-                    if (tags['#task']) {
-                        tags['#task'] += 1000;
-                        tags['#task/石头'] = 2;
-                        tags['#task/剪刀'] = 1;
-                        tags['#task/布'] = 0;
                     }
 
                     return tags;

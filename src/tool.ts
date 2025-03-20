@@ -324,8 +324,8 @@ export class Tool {
                 })
             );
         }
-        menu.addItem(item("pencil", "Rename #" + tagName, () => this.rename(tagName)));
         menu.addSeparator();
+        menu.addItem(item("pencil", "Rename #" + tagName, () => this.rename(tagName)));
         menu.addItem(item("pencil", "Tag Content", (e) => {
             new Notice('先关掉防止误操作');
             // this.createTagPage(tagName, Keymap.isModEvent(e))

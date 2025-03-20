@@ -54,7 +54,21 @@ export class Tool {
 
         // @ts-ignore
         const map = this.app.metadataCache.getTagsOld();
+        // @ts-ignore
+        let childmap = this.app.metadataCache.childMap;
+        if (!childmap) {
+            // @ts-ignore
+            this.app.metadataCache.getTags();
+            // @ts-ignore
+            childmap = this.app.metadataCache.childMap;
+        }
         const tagArr = Object.keys(map).filter(a => {
+            if (this.plugin.settings.grepTooManyChild) {
+                if (childmap[a] && childmap[a]> 10) {
+                    return true;
+                }
+                return false;
+            }
             if (this.plugin.settings.tagoncount < 1) {
                 return true;
             }
@@ -105,7 +119,11 @@ export class Tool {
                 let curTag = itemArr[0];
                 // if (map[`#${curTag}`] > 100) {
                 const tagOri = '#' + tagItem;
-                stringArr.push(`${map[tagOri]} ${tagOri}`);
+                if (this.plugin.settings.grepTooManyChild) {
+                    stringArr.push(`${childmap[tagOri]} ${tagOri}`);
+                } else {
+                    stringArr.push(`${map[tagOri]} ${tagOri}`);
+                }
                 // }
             }
             stringArr.sort((a,b)=>b.localeCompare(a));

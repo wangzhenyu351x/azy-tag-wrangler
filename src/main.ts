@@ -26,13 +26,25 @@ interface TagSettings {
     grepTag:string[];
     tagCountSolo:boolean;
     onlyLevel2:boolean;
+    grepTooManyChild: boolean;
     tagSuggestSortDESC:boolean;
 }
+
+const DefaultTagSettings = { 
+    enableLevel2: true, 
+    tagoncount: 1, 
+    fromCount:0, 
+    grepTag:[], 
+    tagCountSolo:true ,
+    onlyLevel2:false ,
+    tagSuggestSortDESC:true ,
+    grepTooManyChild:false
+};
 
 export default class TagWrangler extends ZYPlugin {
     // pageAliases = new Map();
     tagAliasInfo:TagAliasInfo = null;
-    settings: TagSettings = { enableLevel2: true, tagoncount: 1, fromCount:0, grepTag:[], tagCountSolo:true ,onlyLevel2:false ,tagSuggestSortDESC:true };
+    settings: TagSettings = DefaultTagSettings;
     tool: Tool;
     isSelfClick:boolean = false;
     static tagPlugin: TagWrangler = null;
@@ -311,6 +323,7 @@ export default class TagWrangler extends ZYPlugin {
 
                     let arr = ['#tech', '#res', '#t'];
                     this.ignoreTags = arr.concat(['#task']);
+                    this.childMap = childMap;
                     for (let i = 0; i < arr.length; i++) {
                         const tagItem = arr[i];
                         if (tags[tagItem] && (tags[tagItem] > 10 || tags[tagItem] < 0)) {

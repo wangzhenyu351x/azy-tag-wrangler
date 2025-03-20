@@ -55,12 +55,22 @@ export class TagSettingsTab extends PluginSettingTab {
                     this.plugin.saveSettings();
                 });
             })
-        new Setting(this.containerEl)
+        const grep = new Setting(this.containerEl)
             .setName('仅筛选二级以上')
             .addToggle(to => {
                 to.setValue(this.plugin.settings.onlyLevel2);
                 to.onChange(value => {
                     this.plugin.settings.onlyLevel2 = value;
+                    this.plugin.saveSettings();
+                });
+            })
+        
+        new Setting(grep.settingEl)
+            .setName('筛选子个数超过10个')
+            .addToggle(to => {
+                to.setValue(this.plugin.settings.grepTooManyChild);
+                to.onChange(value => {
+                    this.plugin.settings.grepTooManyChild = value;
                     this.plugin.saveSettings();
                 });
             })

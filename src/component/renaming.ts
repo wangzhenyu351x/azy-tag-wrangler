@@ -1,7 +1,7 @@
 import {confirm} from "smalltalk";
 import {Progress} from "./progress";
 import {validatedInput} from "src/view/validation";
-import {Notice, parseFrontMatterAliases, parseFrontMatterTags, normalizePath} from "obsidian";
+import {Notice, parseFrontMatterAliases, parseFrontMatterTags, normalizePath, TFile} from "obsidian";
 import {Tag, Replacement} from "./Tag";
 import {File} from "./File";
 import TagWrangler from "../main";
@@ -134,9 +134,11 @@ export async function findTargets(app, mytags, needFist = false) {
         }
         return false
     });
+    const files = app.vault.getMarkdownFiles();
     await progress.forEach(
-        app.metadataCache.getCachedFiles(),
-        filename => {
+        files,
+        (file:TFile) => {
+            const filename = file.path;
             const { frontmatter, tags } = app.metadataCache.getCache(filename) || {};
             let sortTags = (tags || []).sort((a,b) => {
                 return a.position.start.offset - b.position.start.offset;

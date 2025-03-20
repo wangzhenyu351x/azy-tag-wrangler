@@ -23,6 +23,7 @@ interface TagSettings {
     enableLevel2: boolean;
     tagoncount: number;
     fromCount:number;
+    childTagLimit:number;
     grepTag:string[];
     tagCountSolo:boolean;
     onlyLevel2:boolean;
@@ -38,7 +39,8 @@ const DefaultTagSettings = {
     tagCountSolo:true ,
     onlyLevel2:false ,
     tagSuggestSortDESC:true ,
-    grepTooManyChild:false
+    grepTooManyChild:false,
+    childTagLimit:7,
 };
 
 export default class TagWrangler extends ZYPlugin {
@@ -296,24 +298,21 @@ export default class TagWrangler extends ZYPlugin {
                             } else {
                                 childMap[faKey] = 1;
                             }
-                            // if (tagKey.startsWith('#task')) {
-                            //     const lat = tagKey.split('/').pop();
-                            //     const latn = parseInt(lat);
-                            //     if (latn && latn > 0) {
-                            //         tags[tagKey] += 10 - latn;
-                            //     }
-                            // }
+                            if (tagKey.startsWith('#task')) {
+                                if (tagKey.contains('task/1')) {
+                                    tags[tagKey] += 20;
+                                } else if (tagKey.contains('task/2')) {
+                                    tags[tagKey] += 10;
+                                }
+                            }
                         }
                     }
                     
                     if (tags['#task']) {
                         tags['#task'] += 10000;
-                        tags['#task/石头'] += 20;
-                        tags['#task/剪刀'] += 10;
-                        // tags['#task/布'] = 0;
                     }
 
-                    const folderLimit = 10;
+                    const folderLimit = that.settings.childTagLimit;
                     const keys = Object.keys(childMap);
                     for (const key of keys) {
                         if (childMap[key] > folderLimit) {

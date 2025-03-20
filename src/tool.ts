@@ -64,7 +64,7 @@ export class Tool {
         }
         const tagArr = Object.keys(map).filter(a => {
             if (this.plugin.settings.grepTooManyChild) {
-                if (childmap[a] && childmap[a]> 10) {
+                if (childmap[a] && childmap[a]> this.plugin.settings.childTagLimit) {
                     return true;
                 }
                 return false;

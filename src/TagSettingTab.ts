@@ -46,6 +46,26 @@ export class TagSettingsTab extends PluginSettingTab {
             })
 
         new Setting(this.containerEl)
+            .setName('子标签限制不超过几个')
+            .addSlider(to => {
+                to.setValue(this.plugin.settings.childTagLimit);
+                to.setLimits(3,10,1);
+                to.setDynamicTooltip();
+                to.onChange(value => {
+                    this.plugin.settings.childTagLimit = value;
+                    this.plugin.saveSettings();
+                });
+            })
+            .setDesc('是否筛选子标签超数的')
+            .addToggle(to => {
+                to.setValue(this.plugin.settings.grepTooManyChild);
+                to.onChange(value => {
+                    this.plugin.settings.grepTooManyChild = value;
+                    this.plugin.saveSettings();
+                });
+            })
+
+        new Setting(this.containerEl)
             .setName('标签数量不包括子标签')
             .setDesc('默认包括')
             .addToggle(to => {
@@ -55,7 +75,8 @@ export class TagSettingsTab extends PluginSettingTab {
                     this.plugin.saveSettings();
                 });
             })
-        const grep = new Setting(this.containerEl)
+
+        new Setting(this.containerEl)
             .setName('仅筛选二级以上')
             .addToggle(to => {
                 to.setValue(this.plugin.settings.onlyLevel2);
@@ -64,16 +85,7 @@ export class TagSettingsTab extends PluginSettingTab {
                     this.plugin.saveSettings();
                 });
             })
-        
-        new Setting(grep.settingEl)
-            .setName('筛选子个数超过10个')
-            .addToggle(to => {
-                to.setValue(this.plugin.settings.grepTooManyChild);
-                to.onChange(value => {
-                    this.plugin.settings.grepTooManyChild = value;
-                    this.plugin.saveSettings();
-                });
-            })
+            
 
         new Setting(this.containerEl)
             .setName('标签提示数量倒序')

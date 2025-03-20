@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { kCptTag } from "./renaming";
 import { App, Notice, TFile } from "obsidian";
 
-const tagBody = /^#[^\u2000-\u206F\u2E00-\u2E7F'!"#$%&()*+,.:;<=>?@^`{|}~\[\]\\\s]+$/;
+const tagBody = /^#[^\u2000-\u206F\u2E00-\u2E7F\'\!\"\#\$\%\&\(\)\*\+\,\.\:\;\<\=\>\?\@\^\`\{\|\}\~\[\]\\\s]+$/;
 
 export class Tag {
     canonical:any;

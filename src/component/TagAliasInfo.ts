@@ -13,17 +13,8 @@ export class TagAliasInfo {
     settings:any = {};
 
     constructor(private app:App,private plugin:Plugin) {
+		this.getTagInfo();
     }
-
-	async modifyFile(file: TAbstractFile) {
-		if (this.skipOnce) {
-			this.skipOnce = false;
-			return;
-		}
-		if (file.path == this.getTagInfoFilename()) {
-			await this.loadTagInfo();
-		}
-	}
 
 	getTagInfoFilename() {
 		return 'fileIgnore/taginfo.md';
@@ -31,10 +22,11 @@ export class TagAliasInfo {
 
 	async getTagInfo() {
 		if (Object.keys(this.tagInfo).length < 3) {
-			console.log('tainfo 没有记录,临时加载');
+			console.log('没有记录,临时加载tainfo',this.tagInfo);
 			await this.loadTagInfo();
+			return await this.getTagInfo();
 		}
-		return await this.getTagInfo();
+		return this.tagInfo;
 	}
 
 	getTagInfoFile() {
@@ -45,7 +37,7 @@ export class TagAliasInfo {
 		return null;
 	}
 
-	async loadTagInfo() {
+	private async loadTagInfo() {
 		if (this.tagInfo == null) this.tagInfo = {};
 		const file = this.getTagInfoFile();
 		if (file == null) return;

@@ -46,7 +46,7 @@ export async function renameTagWith(app, arr, selectHalf = false , getFileName =
             renamed++;
         }
     });
-    await TagWrangler.tagPlugin?.tagAliasInfo.loadTagInfo();
+    await TagWrangler.tagPlugin?.tagAliasInfo.getTagInfo();
     // this.plugin.tagAliasInfo;
     if (renamed > 0 || progress.aborted ) {
         const content = `Operation ${progress.aborted ? "cancelled" : "complete"}: ${renamed} file(s) updated`;

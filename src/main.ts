@@ -53,7 +53,6 @@ export default class TagWrangler extends ZYPlugin {
     // @ts-ignore
     constructor(app, manifest) {
         super(app, manifest);
-        this.tagAliasInfo = new TagAliasInfo(app, this);
         this.tool = new Tool(app, this);
     }
 
@@ -138,7 +137,7 @@ export default class TagWrangler extends ZYPlugin {
                 this.tool.getTagTree();
             }
         });
-        await this.tagAliasInfo.loadTagInfo();
+        this.tagAliasInfo = new TagAliasInfo(this.app, this);
 
         const tagHoverMain = "tag-wrangler:tag-pane";
         // @ts-ignore

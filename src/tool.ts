@@ -1,12 +1,13 @@
 import { App, Keymap, MarkdownView, Menu, Notice, Scope, TFile, TFolder, getLinkpath, iterateCacheRefs } from "obsidian";
 import TagWrangler from "./main";
-import { completeTag, moveToFolder, promptForAliasName, renameTag, renameTagWith } from "./component/renaming";
+import { completeTag, getFilesWithTag, moveToFolder, promptForAliasName, renameTag, renameTagWith } from "./component/renaming";
 import { Replacement, Tag } from "./component/Tag";
 import dayjs from "dayjs";
 import { AliasInfo } from "./component/TagAliasInfo";
 import { String, trim } from "lodash";
 import { EnterTagsModal } from "./view/EnterTagsModal";
 import CChooseTagModal from "./zylib/CChooseTagModal";
+import CChooseFileModal from "./zylib/CChooseFileModal";
 
 export class Tool {
     constructor(private app:App,private plugin:TagWrangler) {
@@ -15,6 +16,27 @@ export class Tool {
     async waitOneSecond() {
         return new Promise(resolve => setTimeout(resolve, 1000));
     }
+
+    async openFileWithTag(tagName:string) {
+        // new Notice('先关掉防止误操作');
+            // this.createTagPage(tagName, Keymap.isModEvent(e))
+        const list = await getFilesWithTag(this.app,tagName);
+        if (list.length == 0) {
+            new Notice('找不到文件');
+        } else if (list.length == 1) {
+            const t = list.first();
+            await this.openTagPage(t.file as TFile, false, false);
+        } else {
+            const flist = list.map(a => a.file);
+            new CChooseFileModal(this.app,'','选择一个文件',flist,undefined).awaitSelection().then(f => {
+                if (f.file) {
+                    this.openTagPage(f.file as TFile, false, false);
+                }
+            }).catch(e=>{});
+        }
+    }
+
+            
 
     async getSearchResult() {
         // this.app.workspace.containerEl;
@@ -318,6 +340,10 @@ export class Tool {
             tagName = tagEl.find(".tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text").textContent;
             isHierarchy = tagEl.parentElement.parentElement.find(".collapse-icon");
         }
+        menu.addItem(item("pencil", "Open With #" + tagName, () => {
+            this.openFileWithTag(tagName);
+        }));
+        menu.addSeparator();
         menu.addItem(item("pencil", "Alias #" + tagName, () => this.alias(tagName)));
         if ("MapFolder" == this.app.vault.getName()) {
             menu.addItem(item("pencil", `move #${tagName} to Folder`, () => {
@@ -333,7 +359,10 @@ export class Tool {
         if (search) {
             menu.addSeparator();
             menu.addItem(
-                item("magnifying-glass", "New search for #" + tagName, () => search.openGlobalSearch("tag:" + tagName))
+                item("magnifying-glass", "New search for #" + tagName, () => {  
+                    
+                    search.openGlobalSearch("tag:" + tagName)
+                })
             );
             menu.addItem(
                 item("magnifying-glass", "search father only for #" + tagName, () => {
@@ -344,10 +373,6 @@ export class Tool {
         }
         menu.addSeparator();
         menu.addItem(item("pencil", "Rename #" + tagName, () => this.rename(tagName)));
-        menu.addItem(item("pencil", "Tag Content", (e) => {
-            new Notice('先关掉防止误操作');
-            // this.createTagPage(tagName, Keymap.isModEvent(e))
-        }));
 
         this.app.workspace.trigger("tag-wrangler:contextmenu", menu, tagName, { search, query, isHierarchy});
 

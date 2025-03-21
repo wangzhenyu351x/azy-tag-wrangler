@@ -13,7 +13,7 @@ export class TagAliasInfo {
     settings:any = {};
 
     constructor(private app:App,private plugin:Plugin) {
-		this.getTagInfo();
+		// this.getTagInfo();
     }
 
 	getTagInfoFilename() {
@@ -22,8 +22,8 @@ export class TagAliasInfo {
 
 	async getTagInfo() {
 		if (Object.keys(this.tagInfo).length < 3) {
-			console.log('没有记录,临时加载tainfo',this.tagInfo);
 			await this.loadTagInfo();
+			// console.log('加载tainfo',this.tagInfo);
 			return await this.getTagInfo();
 		}
 		return this.tagInfo;

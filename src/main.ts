@@ -108,11 +108,8 @@ export default class TagWrangler extends ZYPlugin {
             name: "choose tag",
             callback: () => {
                 new CChooseTagModal(this.app).awaitSelection().then((res:string) =>{
-                    // new Notice(res);
-                    // @ts-ignore
-                    const searchPlugin = this.app.internalPlugins.getPluginById("global-search"), 
-                    search = searchPlugin && searchPlugin.instance;
-                    search && search.openGlobalSearch("tag:" + res);
+                    const tagName = res.replace('#','');
+                    this.tool.openFileWithTag(tagName);
                 }).catch(reason => {
                     console.log(`cancel ${reason}`);
                 });
@@ -268,73 +265,6 @@ export default class TagWrangler extends ZYPlugin {
                 };
             }
         }));
-        const plugin = this;
-
-        this.register(around(metaCache, {
-            // 修改tag数量
-            // @ts-ignore
-            getTags(old) {
-                // @ts-ignore
-                metaCache.getTagsOld = old;
-                return function getTags() {
-                    const tags = old.call(this);
-                    const names = Object.keys(tags); // .map(t => t.toLowerCase()));
-                    names.sort((a,b)=> {
-                        return b.length - a.length;
-                    });
-
-                    let childMap = {};
-                    for (const tagKey of names) {
-                        if (tagKey.contains('/')) {
-                            const arr = tagKey.split('/');
-                            arr.pop();
-                            const faKey = arr.join('/');
-                            if (that.settings.tagCountSolo) {
-                                tags[faKey] -= tags[tagKey];
-                            }
-                            if (childMap[faKey]) {
-                                childMap[faKey] += 1;
-                            } else {
-                                childMap[faKey] = 1;
-                            }
-                            if (tagKey.startsWith('#task')) {
-                                if (tagKey.contains('task/1')) {
-                                    tags[tagKey] += 20;
-                                } else if (tagKey.contains('task/2')) {
-                                    tags[tagKey] += 10;
-                                }
-                            }
-                        }
-                    }
-                    
-                    if (tags['#task']) {
-                        tags['#task'] += 10000;
-                    }
-
-                    const folderLimit = that.settings.childTagLimit;
-                    const keys = Object.keys(childMap);
-                    for (const key of keys) {
-                        if (childMap[key] > folderLimit) {
-                            tags[key] += (childMap[key] -folderLimit) * 1000;
-                        }
-                    }
-
-                    let arr = ['#tech', '#res', '#t'];
-                    this.ignoreTags = arr.concat(['#task']);
-                    this.childMap = childMap;
-                    for (let i = 0; i < arr.length; i++) {
-                        const tagItem = arr[i];
-                        if (tags[tagItem] && (tags[tagItem] > 10 || tags[tagItem] < 0)) {
-                            tags[tagItem] = 0;
-                        }
-                    }
-
-                    return tags;
-                };
-            }
-        }));
-
-
         let hookTreeFlag = false;
         this.app.workspace.onLayoutReady(() => {
             // @ts-ignore
@@ -344,6 +274,69 @@ export default class TagWrangler extends ZYPlugin {
             //         this.app.vault.getAbstractFileByPath(filename), fm
             //     );
             // });
+            this.register(around(metaCache, {
+                // 修改tag数量
+                // @ts-ignore
+                getTags(old) {
+                    // @ts-ignore
+                    metaCache.getTagsOld = old;
+                    return function getTags() {
+                        const tags = old.call(this);
+                        const names = Object.keys(tags); // .map(t => t.toLowerCase()));
+                        names.sort((a,b)=> {
+                            return b.length - a.length;
+                        });
+    
+                        let childMap = {};
+                        for (const tagKey of names) {
+                            if (tagKey.contains('/')) {
+                                const arr = tagKey.split('/');
+                                arr.pop();
+                                const faKey = arr.join('/');
+                                if (that.settings.tagCountSolo) {
+                                    tags[faKey] -= tags[tagKey];
+                                }
+                                if (childMap[faKey]) {
+                                    childMap[faKey] += 1;
+                                } else {
+                                    childMap[faKey] = 1;
+                                }
+                                if (tagKey.startsWith('#task')) {
+                                    if (tagKey.contains('task/1')) {
+                                        tags[tagKey] += 20;
+                                    } else if (tagKey.contains('task/2')) {
+                                        tags[tagKey] += 10;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if (tags['#task']) {
+                            tags['#task'] += 10000;
+                        }
+    
+                        const folderLimit = that.settings.childTagLimit;
+                        const keys = Object.keys(childMap);
+                        for (const key of keys) {
+                            if (childMap[key] > folderLimit) {
+                                tags[key] += (childMap[key] -folderLimit) * 1000;
+                            }
+                        }
+    
+                        let arr = ['#tech', '#res', '#t'];
+                        this.ignoreTags = arr.concat(['#task']);
+                        this.childMap = childMap;
+                        for (let i = 0; i < arr.length; i++) {
+                            const tagItem = arr[i];
+                            if (tags[tagItem] && (tags[tagItem] > 10 || tags[tagItem] < 0)) {
+                                tags[tagItem] = 0;
+                            }
+                        }
+    
+                        return tags;
+                    };
+                }
+            }));
             this.registerEvent(
                 this.app.workspace.on("file-menu", (menu, folder) => {
                     menu.addItem((item) => {

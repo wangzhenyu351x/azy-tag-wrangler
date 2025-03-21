@@ -1,11 +1,22 @@
 import {confirm} from "smalltalk";
 import {Progress} from "./progress";
 import {validatedInput} from "src/view/validation";
-import {Notice, parseFrontMatterAliases, parseFrontMatterTags, normalizePath, TFile} from "obsidian";
+import {Notice, parseFrontMatterAliases, parseFrontMatterTags, normalizePath, TFile, App} from "obsidian";
 import {Tag, Replacement} from "./Tag";
 import {File} from "./File";
 import TagWrangler from "../main";
 export const kCptTag = '_zycpt';
+
+export async function getFilesWithTag(app:App,tag:string):Promise<File[]> {
+    let targets = await findTargets(app, [new Tag(tag)]);
+    targets.sort((a,b) => {
+        // return a.stat.size - b.stat.size; // 大小排序
+        return b.stat.mtime - a.stat.mtime; // 创建时间排序
+    });
+    // console.log(targets);
+    return targets;
+}
+
 export async function renameTagWith(app, arr, selectHalf = false , getFileName = false) {
     for (const repl of arr) {
         if (!repl.fromTag || repl.toTag === repl.fromTag) {
@@ -119,7 +130,7 @@ function allTags(app) {
     return Object.keys(app.metadataCache.getTags());
 }
 
-export async function findTargets(app, mytags, needFist = false) {
+export async function findTargets(app, mytags, needFist = false):Promise<File[]> {
     const targets = [];
     const progress = new Progress(`Searching /*`, "Matching files...");
 

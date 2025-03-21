@@ -114,7 +114,7 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 	}
 
     async getSuggestions(context: EditorSuggestContext): Promise<TagFace[]> {
-		const originString = context.query.trim().toLowerCase();
+		const originString = context.query.trim();
 		let filterString = originString;
 		// const searchCallback = prepareFuzzySearch(filterString);
 		// const queryWords = filterString;
@@ -159,7 +159,7 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 			if (tagsMap[itemOri] > 1000) {
 				continue;
 			}
-			const item = itemOri.toLowerCase();
+			const item = itemOri;
 			if(item.contains(filterString) && (!lastPart || (item.contains(lastPart)))) {
 				tmp.push({type:itemOri, num:tagsMap[itemOri], origin:null});
 			} else if (lastPart && item.endsWith(filterString)) {
@@ -185,8 +185,14 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 		}
 
 		const sortFn = (a,b) => {
-			const atype = a.type.toLowerCase();
-			const btype = b.type.toLowerCase();
+			const atype = a.type;
+			const btype = b.type;
+			if (atype.contains(originString)) { // 输入刚好包含备注,置顶.
+				return -1;
+			}
+			if (btype.contains(originString)) {
+				return 1;
+			}
 			
 			if (lastPart) {
 				if (atype.contains(lastPart) && !btype.contains(lastPart)) {

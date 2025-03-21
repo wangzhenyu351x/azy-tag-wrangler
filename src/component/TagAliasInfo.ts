@@ -6,7 +6,7 @@ export interface AliasInfo {
 	alias?: string[];
 }
 export class TagAliasInfo {
-    tagInfo: TagInfoDict = {};
+    private tagInfo: TagInfoDict = {};
 	tagInfoFrontMatterBuffer: Record<string, object> = {};
 	skipOnce = false;
 	tagInfoBody = "";
@@ -27,6 +27,14 @@ export class TagAliasInfo {
 
 	getTagInfoFilename() {
 		return 'fileIgnore/taginfo.md';
+	}
+
+	async getTagInfo() {
+		if (Object.keys(this.tagInfo).length < 3) {
+			console.log('tainfo 没有记录,临时加载');
+			await this.loadTagInfo();
+		}
+		return await this.getTagInfo();
 	}
 
 	getTagInfoFile() {

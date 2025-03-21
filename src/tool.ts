@@ -472,7 +472,7 @@ export class Tool {
             tagName = `#${tagName}`;
         }
         this.plugin.tagAliasInfo;
-        const dict = this.plugin.tagAliasInfo.tagInfo;
+        const dict = await this.plugin.tagAliasInfo.getTagInfo();
         const aliasInfo:AliasInfo = dict[tagName];
         console.log(tagName,aliasInfo);
         const ers = aliasInfo?.alias?.join(',') ?? '';

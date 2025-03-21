@@ -113,7 +113,7 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 		super.updatePosition(e);
 	}
 
-    getSuggestions(context: EditorSuggestContext): TagFace[]{
+    async getSuggestions(context: EditorSuggestContext): Promise<TagFace[]> {
 		const originString = context.query.trim().toLowerCase();
 		let filterString = originString;
 		// const searchCallback = prepareFuzzySearch(filterString);
@@ -130,7 +130,7 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 			filterString = arr.join('/');
 		}
 		if (filterString.length > 0) {
-			const dict = this.plugin.tagAliasInfo.tagInfo;
+			const dict = await this.plugin.tagAliasInfo.getTagInfo();
 			const tagKeys = Object.keys(dict);
 			for (const keyTag of tagKeys) {
 				const aliasInfo:AliasInfo = dict[keyTag];

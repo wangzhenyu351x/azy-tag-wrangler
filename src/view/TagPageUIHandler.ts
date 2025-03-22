@@ -87,6 +87,10 @@ export class TagPageUIHandler extends Component {
                     // @ts-ignore
                     const searchPlugin = this.plugin.app.internalPlugins.getPluginById("global-search"), search = searchPlugin && searchPlugin.instance, query = search && search.getGlobalSearchQuery();
                     search.openGlobalSearch("tag:" + tagName);
+                } else {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.plugin.tool.openFileWithTag(tagName);
                 }
             }, { capture: true })
         );

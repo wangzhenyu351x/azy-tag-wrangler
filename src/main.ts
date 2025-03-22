@@ -240,6 +240,7 @@ export default class TagWrangler extends ZYPlugin {
         );
 
         this.register(
+            // 预览的图片或md, 双击跳文件.
             onElement(document, "dblclick", ".internal-embed.inline-embed.markdown-embed.is-loaded", (event, targetEl) => {
                 const src = targetEl.getAttribute('src');
                 // console.log('iam click',src);

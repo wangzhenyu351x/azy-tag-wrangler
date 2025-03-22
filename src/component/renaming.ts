@@ -8,7 +8,7 @@ import TagWrangler from "../main";
 export const kCptTag = '_zycpt';
 
 export async function getFilesWithTag(app:App,tag:string):Promise<File[]> {
-    let targets = await findTargets(app, [new Tag(tag)]);
+    let targets = await findTargets(app, [new Tag(tag)],undefined,true);
     targets.sort((a,b) => {
         // return a.stat.size - b.stat.size; // 大小排序
         return b.stat.mtime - a.stat.mtime; // 创建时间排序
@@ -130,7 +130,7 @@ function allTags(app) {
     return Object.keys(app.metadataCache.getTags());
 }
 
-export async function findTargets(app, mytags, needFist = false):Promise<File[]> {
+export async function findTargets(app, mytags, needFist = false, filterTree:boolean=false):Promise<File[]> {
     const targets = [];
     const progress = new Progress(`Searching /*`, "Matching files...");
 
@@ -150,6 +150,9 @@ export async function findTargets(app, mytags, needFist = false):Promise<File[]>
         files,
         (file:TFile) => {
             const filename = file.path;
+            if (filterTree && filename.contains('/tagTree.md')) {
+                return;
+            }
             const { frontmatter, tags } = app.metadataCache.getCache(filename) || {};
             let sortTags = (tags || []).sort((a,b) => {
                 return a.position.start.offset - b.position.start.offset;

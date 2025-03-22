@@ -81,7 +81,7 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 					ch: newQuery.length + subString.lastIndexOf('#') +1,
 					line: cursor.line
 				},
-				query: newQuery.toLowerCase(),
+				query: newQuery,
 			};
 			const excludeSomeChar = ' :|#@$%()';
 			for (const char of excludeSomeChar) {
@@ -187,14 +187,21 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 		const sortFn = (a,b) => {
 			const atype = a.type;
 			const btype = b.type;
-			if (atype.contains(originString)) { // 输入刚好包含备注,置顶.
+			if (atype.contains(originString) && !btype.contains(originString)) { // 输入刚好包含备注,置顶.
 				return -1;
 			}
-			if (btype.contains(originString)) {
+			if (btype.contains(originString) && !atype.contains(originString)) {
 				return 1;
 			}
 			
 			if (lastPart) {
+				const sLastPart = '/' + lastPart;
+				if (atype.endsWith(sLastPart) && !btype.endsWith(sLastPart)) {
+					return -1;
+				}
+				if (btype.endsWith(sLastPart) && !atype.endsWith(sLastPart)) {
+					return 1;
+				}
 				if (atype.contains(lastPart) && !btype.contains(lastPart)) {
 					return -1;
 				}
@@ -206,10 +213,10 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 			const aIx = atype.indexOf(originString);
 			const bIx = btype.indexOf(originString);
 			if (bIx == aIx) {
-				if (this.plugin.settings.tagSuggestSortDESC) {
-					return b.num - a.num;
-				}
-				return  a.num -b.num;
+				// if (this.plugin.settings.tagSuggestSortDESC) {
+				// 	return b.num - a.num;
+				// }
+				return  b.num -a.num;
 			} else {
 				return aIx - bIx;
 			}

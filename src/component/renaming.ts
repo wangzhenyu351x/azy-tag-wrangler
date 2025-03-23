@@ -150,7 +150,8 @@ export async function findTargets(app, mytags, needFist = false, filterTree:bool
         files,
         (file:TFile) => {
             const filename = file.path;
-            if (filterTree && filename.contains('/tagTree.md')) {
+            if (filterTree && (filename.contains('/tagTree.md')
+                || filename.contains('/taginfo.md'))) {
                 return;
             }
             const { frontmatter, tags } = app.metadataCache.getCache(filename) || {};

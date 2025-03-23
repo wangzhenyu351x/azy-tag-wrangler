@@ -103,10 +103,11 @@ export class Tool {
                 if (this.plugin.settings.onlyLevel2 && arr.length > 2) {
                     return false;
                 }
-                if (this.plugin.settings.grepTag.length > 0) {
-                    if (!this.plugin.settings.grepTag.contains(first)) {
-                        return false;
-                    }
+            }
+            if (this.plugin.settings.grepTag.length > 0) {
+                const grepTag = this.plugin.settings.grepTag.first();
+                if (a!=grepTag && !a.startsWith(grepTag + '/')) {
+                    return false;
                 }
             }
             if (map[a] <= this.plugin.settings.tagoncount && map[a] > this.plugin.settings.fromCount ) {

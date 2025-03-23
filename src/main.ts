@@ -275,6 +275,8 @@ export default class TagWrangler extends ZYPlugin {
             //         this.app.vault.getAbstractFileByPath(filename), fm
             //     );
             // });
+            metaCache.getTagInfo = this.tagAliasInfo.getTagInfo.bind(this.tagAliasInfo);
+            
             this.register(around(metaCache, {
                 // 修改tag数量
                 // @ts-ignore

@@ -5,17 +5,11 @@ import {
 	EditorSuggest,
 	EditorSuggestContext,
 	EditorSuggestTriggerInfo,
-	getLinkpath,
-	MarkdownView,
-	Notice,
-	Plugin,
-	PluginSettingTab,
-	prepareFuzzySearch,
-	Setting,
 	TFile,
 } from "obsidian";
 import TagWrangler from "../main";
 import { AliasInfo } from "../component/TagAliasInfo";
+import {getTagSuggestions} from "../zylib/CommonTool";
 
 const escapeRegExp = (str: string) => {
 	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& = the whole matched string
@@ -28,13 +22,13 @@ const compare2Tag = (a:string,b:string) => {
 	return a == b;
 }
 
-interface TagFace {
-	type: string,
-	num: number,
-	origin: string
+interface TagSuggestion {
+	tag: string;
+	num: number;
+	origin?:string;
 }
 
-export class TagEditorSuggest extends EditorSuggest<TagFace> {
+export class TagEditorSuggest extends EditorSuggest<TagSuggestion> {
 	private isOpen:boolean = false;
 	private tagsMap:any;
 	private lastFilePath:string;
@@ -113,143 +107,36 @@ export class TagEditorSuggest extends EditorSuggest<TagFace> {
 		super.updatePosition(e);
 	}
 
-    async getSuggestions(context: EditorSuggestContext): Promise<TagFace[]> {
+    async getSuggestions(context: EditorSuggestContext): Promise<TagSuggestion[]> {
 		const originString = context.query.trim();
-		let filterString = originString;
-		// const searchCallback = prepareFuzzySearch(filterString);
-		// const queryWords = filterString;
-		let tmp:TagFace[] = [];
-		// @ts-ignore
-		const tagsMap:any = this.tagsMap;
-		const arr:string[] = [...Object.keys(tagsMap)];
-		let aliases = [];
-		let lastPart = null;
-		if (filterString.contains('/')) {
-			const arr = filterString.split('/');
-			lastPart = arr.pop();
-			filterString = arr.join('/');
-		}
-		if (filterString.length > 0) {
-			const dict = await this.plugin.tagAliasInfo.getTagInfo();
-			const tagKeys = Object.keys(dict);
-			for (const keyTag of tagKeys) {
-				const aliasInfo:AliasInfo = dict[keyTag];
-				if (aliasInfo.alias) {
-					for (const value of aliasInfo.alias) {
-						if (lastPart) {
-							if(keyTag.contains(filterString) && value.contains(lastPart)) {
-								tmp.push({type:value, num:tagsMap[keyTag], origin:keyTag});
-								aliases.push(`${keyTag}`);
-								// console.log(keyTag,originString,value);
-							}
-						} else {
-							if(value.contains(filterString)) {
-								tmp.push({type:value, num:tagsMap[keyTag], origin:keyTag});
-								aliases.push(`${keyTag}`);
-								// console.log(keyTag,originString,value);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		let secondList:TagFace[] = [];
-		for (const itemOri of arr) {
-			if (tagsMap[itemOri] > 1000) {
-				continue;
-			}
-			const item = itemOri;
-			if(item.contains(filterString) && (!lastPart || (item.contains(lastPart)))) {
-				tmp.push({type:itemOri, num:tagsMap[itemOri], origin:null});
-			} else if (lastPart && item.endsWith(filterString)) {
-				secondList.push({type:itemOri, num:tagsMap[itemOri], origin:null});
-			} else  {
-				for (const alias of aliases) {
-					if (itemOri.startsWith(alias) && itemOri != alias) {
-						tmp.push({type:itemOri, num:tagsMap[itemOri], origin:null});
-					}
-				}
-			}
-		}
-		
-		// console.log(filterString,tmp);
-		if(tmp.length == 0) {
-			if (secondList.length > 0) {
-				for (const item of secondList) {
-					tmp.push({type:'新建', num:0, origin:item.type + '/' + lastPart});		
-				}
-			} else {
-				tmp.push({type:'新建', num:0, origin:originString});
-			}
-		}
-
-		const sortFn = (a,b) => {
-			const atype = a.type;
-			const btype = b.type;
-			if (atype.contains(originString) && !btype.contains(originString)) { // 输入刚好包含备注,置顶.
-				return -1;
-			}
-			if (btype.contains(originString) && !atype.contains(originString)) {
-				return 1;
-			}
-			
-			if (lastPart) {
-				const sLastPart = '/' + lastPart;
-				if (atype.endsWith(sLastPart) && !btype.endsWith(sLastPart)) {
-					return -1;
-				}
-				if (btype.endsWith(sLastPart) && !atype.endsWith(sLastPart)) {
-					return 1;
-				}
-				if (atype.contains(lastPart) && !btype.contains(lastPart)) {
-					return -1;
-				}
-				if (btype.contains(lastPart) && !atype.contains(lastPart)) {
-					return 1;
-				}
-			}
-
-			const aIx = atype.indexOf(originString);
-			const bIx = btype.indexOf(originString);
-			if (bIx == aIx) {
-				// if (this.plugin.settings.tagSuggestSortDESC) {
-				// 	return b.num - a.num;
-				// }
-				return  b.num -a.num;
-			} else {
-				return aIx - bIx;
-			}
-		};
-		tmp.sort(sortFn);
-
+		const tmp = await getTagSuggestions(originString,this.tagsMap);
         return tmp;
     }
 
-    renderSuggestion(value: TagFace, el: HTMLElement): void {
+    renderSuggestion(value: TagSuggestion, el: HTMLElement): void {
 		if (value.origin) {
-			el.innerHTML = `${value.origin.replace('#','')} (${value.num}) | ${value.type.replace('#','')}`;
+			el.innerHTML = `${value.origin.replace('#','')} (${value.num}) | ${value.tag.replace('#','')}`;
 			return;
 		}
-		el.innerHTML = `${value.type.replace('#','')} (${value.num})`;
+		el.innerHTML = `${value.tag.replace('#','')} (${value.num})`;
     }
 
-    selectSuggestion(value: TagFace, evt: MouseEvent | KeyboardEvent): void {
+    selectSuggestion(value: TagSuggestion, evt: MouseEvent | KeyboardEvent): void {
         if (this.context) {
             const editor: Editor = this.context.editor as Editor;
 			const lineString = editor.getLine(this.context.start.line);
 			const sele = editor.getSelection();
 			// const taglist = ['what','why','how'];
 			// for (const item of taglist) {
-			// 	if (value.type.contains('/' +item)) {
-			// 		if (!value.type.startsWith('_')) {
-			// 			value.type = '_' + value.type;
+			// 	if (value.tag.contains('/' +item)) {
+			// 		if (!value.tag.startsWith('_')) {
+			// 			value.tag = '_' + value.tag;
 			// 		}
 			// 		break;
 			// 	}	
 			// }
 
-			let replacement = `${value.type}`;
+			let replacement = `${value.tag}`;
 			if (value.origin) {
 				replacement = `${value.origin}`;
 			}

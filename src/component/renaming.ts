@@ -189,7 +189,7 @@ async function promptForNewName(app, tagName) {
             'tag',
             `Renaming #${tagName} (and any sub-tags)`, "Enter new name (must be a valid Obsidian tag):\n",
             tagName,
-            "[^\u2000-\u206F\u2E00-\u2E7F'!\"#$%&()*+,.:;<=>?@^`{|}~\\[\\]\\\\\\s]+",
+            ".+",
             "Obsidian tag name"
         );
     } catch(e) {
@@ -204,7 +204,7 @@ export async function promptForAliasName(app, tagName, oriAlias) {
             'alias',
             `Alias #${tagName} (and any sub-tags)`, "输入别名:\n",
             oriAlias,
-            ".*",
+            ".+",
             "Obsidian alias list"
         );
     } catch(e) {

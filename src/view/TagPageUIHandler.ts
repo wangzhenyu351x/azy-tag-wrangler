@@ -44,8 +44,14 @@ export class TagPageUIHandler extends Component {
         this.register(
             // Open tag page w/alt click (current pane) or ctrl/cmd/middle click (new pane)
             onElement(document, "click", selector, (event, targetEl) => {
-                const { altKey } = event;
+                const { altKey,shiftKey } = event;
                 const tagName = toTag(targetEl);
+                if (shiftKey) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.plugin.tool.openFileWithTag(tagName);
+                    return;
+                }
                 if (!altKey) {
                     // console.log('not alt click',selector,event.altKey,event);
                     if (selector == 'span.cm-hashtag') {
@@ -83,14 +89,10 @@ export class TagPageUIHandler extends Component {
                     event.stopPropagation();
                     return false;
                 }
-                if (altKey && selector == 'span.cm-hashtag') {
+                if (altKey) {
                     // @ts-ignore
                     const searchPlugin = this.plugin.app.internalPlugins.getPluginById("global-search"), search = searchPlugin && searchPlugin.instance, query = search && search.getGlobalSearchQuery();
                     search.openGlobalSearch("tag:" + tagName);
-                } else {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    this.plugin.tool.openFileWithTag(tagName);
                 }
             }, { capture: true })
         );

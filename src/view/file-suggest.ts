@@ -1,9 +1,10 @@
 ﻿//https://github.com/liamcain/obsidian-periodic-notes/blob/main/src/ui/file-suggest.ts
 import { TAbstractFile, TFile, TFolder } from "obsidian";
 import { TextInputSuggest } from "./suggest";
+import { getTagSuggestions } from "@utils/zylib/CommonTool";
 
 export class FileSuggest extends TextInputSuggest {
-    getSuggestions(inputStr){
+    async getSuggestions(inputStr){
         inputStr = inputStr.trim();
         const abstractFiles = this.app.vault.getAllLoadedFiles();
         const files = [];
@@ -35,36 +36,41 @@ export class FileSuggest extends TextInputSuggest {
 
 export class TagSuggest extends TextInputSuggest {
 
-    allTags() {
-        // @ts-ignore
-        return Object.keys(this.app.metadataCache.getTags()).map(a => a.replace('#',''));
+    // allTags() {
+    //     // @ts-ignore
+    //     return Object.keys().map(a => a.replace('#',''));
+    // }
+    private tagsMap:any;
+    constructor(app, inputEl, fathEl) {
+        super(app,inputEl,fathEl);
+        this.tagsMap = this.app.metadataCache.getTags();
     }
 
-    getSuggestions(inputStr) {
+    async getSuggestions(inputStr) {
         inputStr = inputStr.trim();
         let lastPart = null;
         let otherPart = null;
         if (inputStr.contains(' ')) {
             inputStr = inputStr.split(' ')[0];
         }
-        if (inputStr.contains('/')) {
-            const arr = inputStr.split('/');
-            lastPart = arr.pop();
-            otherPart = arr.join('/');
-        }
-        
-        let tags = this.allTags();
-        tags.push('_zydel');
-        const files = [];
-        tags.forEach((file) => {
-            if (file.contains(inputStr) || (lastPart && file.contains(lastPart) && file.contains(otherPart))) {
-                files.push(file);
-            }
+        // if (inputStr.contains('/')) {
+        //     const arr = inputStr.split('/');
+        //     lastPart = arr.pop();
+        //     otherPart = arr.join('/');
+        // }
+
+        const tmp = await getTagSuggestions(inputStr,this.tagsMap);
+        let arr = tmp.map(a => {
+            const tag = a.origin?? a.tag;
+            return tag.replace('#','');
         });
-        if (files.length  > 0) {
-            files.splice(0,0,'$1');
+        if (arr.length  > 0) {
+            arr.splice(0,0,'$1');
         }
-        return files;
+        if (inputStr.contains('del')) {
+            arr.push('_zydel');
+        }
+        return arr;
     }
 
     renderSuggestion(tag, el) {
@@ -88,7 +94,7 @@ export class TagSuggest extends TextInputSuggest {
 }
 
 export class FolderSuggest extends TextInputSuggest {
-    getSuggestions(inputStr) {
+    async getSuggestions(inputStr) {
         const abstractFiles = this.app.vault.getAllLoadedFiles();
         const folders = [];
         const lowerCaseInputStr = inputStr.split(',').last().trim().toLowerCase();

@@ -135,10 +135,10 @@ export class TextInputSuggest {
         );
     }
 
-    onInputChanged(){
+    async onInputChanged(){
         const inputStr = this.inputEl.value;
         // @ts-ignore
-        const suggestions = this.getSuggestions(inputStr);
+        const suggestions = await this.getSuggestions(inputStr);
         if (suggestions.length > 0) {
             this.suggest.setSuggestions(suggestions);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

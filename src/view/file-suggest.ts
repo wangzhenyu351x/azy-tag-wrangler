@@ -88,7 +88,7 @@ export class TagSuggest extends TextInputSuggest {
                 this.inputEl.value = tag;
             }
         }
-        this.inputEl.trigger("input");
+        // this.inputEl.trigger("input");
         this.close();
     }
 }

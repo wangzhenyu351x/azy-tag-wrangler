@@ -153,9 +153,9 @@ export default class TagWrangler extends ZYPlugin {
         this.addChild(
             // Tags in the tag pane
             new TagPageUIHandler(this, {
-                hoverSource: tagHoverMain,
+                // hoverSource: tagHoverMain,
                 selector: ".tag-pane-tag",
-                container: ".tag-container",
+                // container: ".tag-container",
                 toTag(el) {
                     let tag = el.find(".tag-pane-tag-text, tag-pane-tag-text, .tag-pane-tag .tree-item-inner-text")?.textContent;  
                     if (tag.contains(' (')) {
@@ -171,9 +171,9 @@ export default class TagWrangler extends ZYPlugin {
         this.addChild(
             // Tags in the tag pane
             new TagPageUIHandler(this, {
-                hoverSource: null,
-                selector: ".memo-content-text .tag",
-                container: ".memolist-wrapper",
+                // hoverSource: null,
+                selector: ".memo-content-text .tag, .mm-mindmap .tag",
+                // container: ".memolist-wrapper",
                 toTag(el: HTMLElement) { 
                      let tag = el.textContent; 
                     if (tag.contains(' (')) {
@@ -198,9 +198,9 @@ export default class TagWrangler extends ZYPlugin {
         this.addChild(
             // 编辑模式
             new TagPageUIHandler(this, {
-                hoverSource: "editor",
+                // hoverSource: "editor",
                 selector: "span.cm-hashtag",
-                container: ".markdown-source-view.is-live-preview",
+                // container: ".markdown-source-view.is-live-preview",
                 toTag(el) {
                     // Multiple cm-hashtag elements can be side by side: join them all together:
                     let tagName = el.textContent;
@@ -329,10 +329,15 @@ export default class TagWrangler extends ZYPlugin {
                         let arr = ['#tech', '#res', '#t'];
                         this.ignoreTags = arr.concat(['#task']);
                         this.childMap = childMap;
+                        const resKey = '#res';
                         for (let i = 0; i < arr.length; i++) {
                             const tagItem = arr[i];
                             if (tags[tagItem] && (tags[tagItem] > 10 || tags[tagItem] < 0)) {
-                                tags[tagItem] = 0;
+                                if (tagItem == resKey && childMap[resKey]) {
+                                    tags[tagItem] = childMap[resKey];
+                                } else {
+                                    tags[tagItem] = 0;
+                                }
                             }
                         }
     

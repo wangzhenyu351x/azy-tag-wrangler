@@ -6,9 +6,9 @@ import {
 import TagWrangler from "../main";
 
 interface TagUIFace {
-    container:string,
+    // container:string,
     selector:string,
-    hoverSource:string,
+    // hoverSource:string,
     toTag(el:HTMLElement):string
 }
 
@@ -25,7 +25,7 @@ export class TagPageUIHandler extends Component {
     onload() {
         // 处理UIhook
         // 经过特定的选择器, 或者点击特定的选择器, 拦截或者触发特定操作.
-        const { selector, container, hoverSource, toTag } = this.opts;
+        const { selector, toTag } = this.opts; // container, hoverSource,
         // this.register(
         //  显示tagpage. 专为tag生成的md文件.
         //     // Show tag page on hover

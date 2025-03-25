@@ -49,6 +49,7 @@ export default class TagWrangler extends ZYPlugin {
     settings: TagSettings = DefaultTagSettings;
     tool: Tool;
     isSelfClick:boolean = false;
+    statusBar:HTMLElement;
     static tagPlugin: TagWrangler = null;
     // @ts-ignore
     constructor(app, manifest) {
@@ -68,22 +69,8 @@ export default class TagWrangler extends ZYPlugin {
         setTimeout(() => {
             this.tool.updatePluginsJson();
         }, 1000);
-        // this.register(
-        //     onElement(document, "contextmenu", ".tag-pane-tag", this.tool.onMenu.bind(this.tool), { capture: true })
-        // );
 
-        // hook 全部展开icon
-        // this.register(
-        //     onElement(document, "click", '.nav-action-button[aria-label="全部展开"]', (event, tagEl)=> {
-        //         const leaf = this.app.workspace.getLeavesOfType('tag').first();
-        //         // @ts-ignore
-        //         if (leaf && leaf.view.tree.isAllCollapsed) {
-        //             console.log('i am click');
-        //             event.preventDefault();
-        //             event.stopPropagation();
-        //         }
-        //     }, { capture: true })
-        // );
+        this.statusBar = this.addStatusBarItem();
 
         this.addCommand({
             id: 'tag-replace',
@@ -291,14 +278,21 @@ export default class TagWrangler extends ZYPlugin {
                         });
     
                         let childMap = {};
+                        let lowTagCount = 0;
+                        const igArr = ['#tech', '#res', '#t'];
                         for (const tagKey of names) {
                             if (tagKey.contains('/')) {
                                 const arr = tagKey.split('/');
                                 arr.pop();
+                                const rootKey = arr[0];
                                 const faKey = arr.join('/');
                                 if (that.settings.tagCountSolo) {
                                     tags[faKey] -= tags[tagKey];
                                 }
+                                if (!igArr.contains(rootKey) && tags[tagKey] > 0 && tags[tagKey]<5) {
+                                    lowTagCount +=1;
+                                }
+
                                 if (childMap[faKey]) {
                                     childMap[faKey] += 1;
                                 } else {
@@ -313,6 +307,7 @@ export default class TagWrangler extends ZYPlugin {
                                 }
                             }
                         }
+                        that.statusBar.innerHTML = `${lowTagCount}`;
                         
                         if (tags['#task']) {
                             tags['#task'] += 10000;
@@ -326,12 +321,11 @@ export default class TagWrangler extends ZYPlugin {
                             }
                         }
     
-                        let arr = ['#tech', '#res', '#t'];
-                        this.ignoreTags = arr.concat(['#task']);
+                        this.ignoreTags = igArr.concat(['#task']);
                         this.childMap = childMap;
                         const resKey = '#res';
-                        for (let i = 0; i < arr.length; i++) {
-                            const tagItem = arr[i];
+                        for (let i = 0; i < igArr.length; i++) {
+                            const tagItem = igArr[i];
                             if (tags[tagItem] && (tags[tagItem] > 10 || tags[tagItem] < 0)) {
                                 if (tagItem == resKey && childMap[resKey]) {
                                     tags[tagItem] = childMap[resKey];

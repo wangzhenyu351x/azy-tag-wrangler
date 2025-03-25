@@ -204,7 +204,7 @@ export async function promptForAliasName(app, tagName, oriAlias) {
             'alias',
             `Alias #${tagName} (and any sub-tags)`, "输入别名:\n",
             oriAlias,
-            ".+",
+            ".*",
             "Obsidian alias list"
         );
     } catch(e) {

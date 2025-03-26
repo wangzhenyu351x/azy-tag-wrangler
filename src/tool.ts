@@ -300,6 +300,9 @@ export class Tool {
             );
         });
 
+
+        markdownView.leaf.detach();
+
         // const toExcuteCmdId = "heycalmdown-navigate-cursor-history:cursor-position-backward";
         // if (this.app.commands.findCommand(toExcuteCmdId)) {
         //     this.app.commands.executeCommandById(toExcuteCmdId);  
@@ -367,8 +370,8 @@ export class Tool {
             );
             menu.addItem(
                 item("magnifying-glass", "search father only for #" + tagName, () => {
-                    const inner = tagName.replace('/','\\/');
-                    search.openGlobalSearch(`/${inner}\\s/`)
+                    const inner = tagName.replace(/\//g,'\\/');
+                    search.openGlobalSearch(`/${inner}(?!\\/)/`)
                 })
             );
         }

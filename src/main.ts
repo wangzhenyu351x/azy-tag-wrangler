@@ -391,6 +391,18 @@ export default class TagWrangler extends ZYPlugin {
                             }
                         }
                     }));
+                    // 解决merge 文件,显示的不是目标文件.
+                    this.register(around(this.app.fileManager, {
+                        // @ts-ignore
+                        trashFile(old) {
+                            return function(f:TFile) {
+                                if (f == that.app.workspace.getActiveFile()) {
+                                    that.app.workspace.activeLeaf.detach();
+                                }
+                                return old.apply(this,arguments);
+                            }
+                        }
+                    }));
                     this.register(around(view, {
                         setUseHierarchy(old) {
                             return function() {

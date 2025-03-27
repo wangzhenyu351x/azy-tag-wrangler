@@ -4,6 +4,7 @@ import {
     Plugin
 } from "obsidian";
 import TagWrangler from "../main";
+import { fathTagSearchReg } from "@utils/tool";
 
 interface TagUIFace {
     // container:string,
@@ -46,7 +47,7 @@ export class TagPageUIHandler extends Component {
             onElement(document, "click", selector, (event, targetEl) => {
                 const { altKey,shiftKey } = event;
                 const tagName = toTag(targetEl);
-                if (shiftKey) {
+                if (shiftKey && selector != 'span.cm-hashtag') {  // 否则会和"选择区域"起冲突.
                     event.preventDefault();
                     event.stopPropagation();
                     this.plugin.tool.openFileWithTag(tagName);
@@ -90,9 +91,16 @@ export class TagPageUIHandler extends Component {
                     return false;
                 }
                 if (altKey) {
+                    event.preventDefault();
+                    event.stopPropagation();
                     // @ts-ignore
                     const searchPlugin = this.plugin.app.internalPlugins.getPluginById("global-search"), search = searchPlugin && searchPlugin.instance, query = search && search.getGlobalSearchQuery();
-                    search.openGlobalSearch("tag:" + tagName);
+                    if (this.plugin.settings.searchFTagOnly) {
+                        const res = fathTagSearchReg(tagName);
+                        search.openGlobalSearch(res);
+                    } else {
+                        search.openGlobalSearch("tag:" + tagName);
+                    }
                 }
             }, { capture: true })
         );

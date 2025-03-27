@@ -105,5 +105,15 @@ export class TagSettingsTab extends PluginSettingTab {
                     this.plugin.saveSettings();
                 });
             })
+
+        new Setting(this.containerEl)
+            .setName('默认只搜索当前标签,不包括子标签')
+            .addToggle(to => {
+                to.setValue(this.plugin.settings.searchFTagOnly);
+                to.onChange(value => {
+                    this.plugin.settings.searchFTagOnly = value;
+                    this.plugin.saveSettings();
+                });
+            })
     }
 }

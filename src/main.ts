@@ -30,6 +30,7 @@ interface TagSettings {
     grepTooManyChild: boolean;
     tagSuggestSortDESC:boolean;
     fileContext:boolean;
+    searchFTagOnly:boolean;
 }
 
 const DefaultTagSettings = { 
@@ -42,7 +43,8 @@ const DefaultTagSettings = {
     tagSuggestSortDESC:true ,
     grepTooManyChild:false,
     childTagLimit:7,
-    fileContext:false
+    fileContext:false,
+    searchFTagOnly:false,
 };
 
 export default class TagWrangler extends ZYPlugin {
@@ -309,13 +311,13 @@ export default class TagWrangler extends ZYPlugin {
                                 } else {
                                     childMap[faKey] = 1;
                                 }
-                                if (tagKey.startsWith('#task')) {
-                                    if (tagKey.contains('task/1')) {
-                                        tags[tagKey] += 20;
-                                    } else if (tagKey.contains('task/2')) {
-                                        tags[tagKey] += 10;
-                                    }
-                                }
+                                // if (tagKey.startsWith('#task')) {
+                                //     if (tagKey.contains('task/1')) {
+                                //         tags[tagKey] += 20;
+                                //     } else if (tagKey.contains('task/2')) {
+                                //         tags[tagKey] += 10;
+                                //     }
+                                // }
                             }
                         }
                         that.statusBar.innerHTML = `${lowTagCount}`;
@@ -327,8 +329,14 @@ export default class TagWrangler extends ZYPlugin {
                         const folderLimit = that.settings.childTagLimit;
                         const keys = Object.keys(childMap);
                         for (const key of keys) {
-                            if (childMap[key] > folderLimit) {
-                                tags[key] += (childMap[key] -folderLimit) * 1000;
+                            if (childMap[key] > 9) {
+                                if (childMap[key] %10 == 0) {
+                                    childMap[key] -= 1;
+                                }
+                                // tags[key] += (childMap[key] -folderLimit) * 1000;
+                                tags[key] += childMap[key]/100.0;
+                            } else {
+                                tags[key] += childMap[key]/10.0;
                             }
                         }
     
@@ -339,9 +347,9 @@ export default class TagWrangler extends ZYPlugin {
                             const tagItem = igArr[i];
                             if (tags[tagItem] && (tags[tagItem] > 10 || tags[tagItem] < 0)) {
                                 if (tagItem == resKey && childMap[resKey]) {
-                                    tags[tagItem] = childMap[resKey];
+                                    tags[tagItem] = childMap[tagItem]/100.0;
                                 } else {
-                                    tags[tagItem] = 0;
+                                    tags[tagItem] = 0;   
                                 }
                             }
                         }

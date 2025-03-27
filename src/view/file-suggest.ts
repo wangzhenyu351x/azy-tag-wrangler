@@ -83,7 +83,7 @@ export class TagSuggest extends TextInputSuggest {
             if (origin.contains(' ')) {
                 const arr = origin.split(' ');
                 arr[0] = tag;
-                this.inputEl.value = arr.join('/');
+                this.inputEl.value = arr.join('/').replace('//','/');
             } else {
                 this.inputEl.value = tag;
             }

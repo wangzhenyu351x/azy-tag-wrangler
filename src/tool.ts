@@ -86,7 +86,8 @@ export class Tool {
 			const fileCache = app.metadataCache.getCache(file.path);
 			if (fileCache) {
 				link.linkCount += fileCache.links ? fileCache.links.length : 0;
-                link.linkCount += fileCache.tags ? fileCache.tags.length : 0;
+                // link.linkCount += fileCache.tags ? fileCache.tags.length : 0;
+				link.linkCount += fileCache.embeds ? fileCache.embeds.length : 0;
 			}
             linkfiles.push(link as FileLink);
 		}
@@ -405,8 +406,8 @@ export class Tool {
             );
             menu.addItem(
                 item("magnifying-glass", "search father only for #" + tagName, () => {
-                    const inner = tagName.replace(/\//g,'\\/');
-                    search.openGlobalSearch(`/${inner}(?!\\/)/`)
+                    const res = fathTagSearchReg(tagName);
+                    search.openGlobalSearch(res);
                 })
             );
         }
@@ -584,4 +585,9 @@ export function execCmdString(cmdString){
             console.log(result);
         }
     })
+  }
+
+  export function fathTagSearchReg(tagName:string) {
+    const inner = tagName.replace(/\//g,'\\/');
+    return `/(\\s)#${inner}(?!\\/)/`;
   }

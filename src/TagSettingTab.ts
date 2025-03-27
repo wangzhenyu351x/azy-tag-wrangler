@@ -96,5 +96,14 @@ export class TagSettingsTab extends PluginSettingTab {
                     this.plugin.saveSettings();
                 });
             })
+        new Setting(this.containerEl)
+            .setName('文件夹右键加特性')
+            .addToggle(to => {
+                to.setValue(this.plugin.settings.fileContext);
+                to.onChange(value => {
+                    this.plugin.settings.fileContext = value;
+                    this.plugin.saveSettings();
+                });
+            })
     }
 }

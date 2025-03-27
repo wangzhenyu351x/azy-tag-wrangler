@@ -35,6 +35,9 @@ class rollupPlugin {
       }
 
       if (pluginId) {
+        copyFileSync(`../../.obsidian/plugins/tag-wrangler/main.js`,
+          `../../../Vocabulary/.obsidian/plugins/tag-wrangler/main.js`
+        );
           child.exec(`~/bin/obsidianReloadPlugin "${pluginId}"`, (err, sto)=> {
               if (err) {
                   console.error(err);

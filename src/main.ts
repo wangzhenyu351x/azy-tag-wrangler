@@ -29,6 +29,7 @@ interface TagSettings {
     onlyLevel2:boolean;
     grepTooManyChild: boolean;
     tagSuggestSortDESC:boolean;
+    fileContext:boolean;
 }
 
 const DefaultTagSettings = { 
@@ -41,6 +42,7 @@ const DefaultTagSettings = {
     tagSuggestSortDESC:true ,
     grepTooManyChild:false,
     childTagLimit:7,
+    fileContext:false
 };
 
 export default class TagWrangler extends ZYPlugin {
@@ -355,7 +357,7 @@ export default class TagWrangler extends ZYPlugin {
                                 execCmdString(`open -a SublimeText ${basePath}/${path}`);
                             });
                     });
-                    if (!(folder instanceof TFolder)) return;
+                    if (!(folder instanceof TFolder) || !this.settings.fileContext) return;
                     menu.addItem((item) => {
                         item
                             .setTitle("Tag all notes in this folder")
@@ -367,6 +369,34 @@ export default class TagWrangler extends ZYPlugin {
                                         await this.tool.addTagsToNotes(tagArray, folder, includeSubfolders);
                                     }
                                 }).open();
+                            });
+                    });
+                    menu.addItem((item) => {
+                        item
+                            .setTitle("add ctime to fmt in this folder")
+                            .setIcon("tags")
+                            .onClick(async () => {
+                                const path = normalizePath(folder.path);
+                                const list = await this.app.vault.adapter.list(path);
+                                for (const filepath of list.files) {
+                                    const file = this.app.vault.getAbstractFileByPath(filepath) as TFile;
+                                    if (!file) {
+                                        continue;
+                                    }
+                                    // @ts-ignore
+                                    await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+                                        if(!frontmatter.ctime) {
+                                            frontmatter.ctime = file.stat.ctime;
+                                        }
+                                    })
+                                }
+                                // console.log(list);
+                                // new EnterTagsModal(this.app, async (tags, includeSubfolders) => {
+                                //     if (tags) {
+                                //         const tagArray = tags.split(",");
+                                //         await this.tool.addTagsToNotes(tagArray, folder, includeSubfolders);
+                                //     }
+                                // }).open();
                             });
                     });
                 })

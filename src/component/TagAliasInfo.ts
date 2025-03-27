@@ -37,7 +37,7 @@ export class TagAliasInfo {
 		return null;
 	}
 
-	private async loadTagInfo() {
+	async loadTagInfo() {
 		if (this.tagInfo == null) this.tagInfo = {};
 		const file = this.getTagInfoFile();
 		if (file == null) return;

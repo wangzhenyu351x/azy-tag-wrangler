@@ -8,6 +8,12 @@ import { String, trim } from "lodash";
 import { EnterTagsModal } from "./view/EnterTagsModal";
 import CChooseTagModal from "./zylib/CChooseTagModal";
 import CChooseFileModal from "./zylib/CChooseFileModal";
+import { zy_getBackLinkCounts } from "./zylib/CommonTool";
+
+interface FileLink {
+    file:TFile,
+    linkCount:number,
+}
 
 export class Tool {
     constructor(private app:App,private plugin:TagWrangler) {
@@ -65,6 +71,35 @@ export class Tool {
             console.log(`cancel ${reason}`);
         });
 
+    }
+
+    async grepFileHighLinks() {
+        const backlinkCounts = zy_getBackLinkCounts(this.plugin.app);
+		const app = this.plugin.app;
+        const files = this.plugin.app.vault.getMarkdownFiles();
+        let linkfiles:FileLink[] = [];
+        for (const file of files) {
+			const count = backlinkCounts[file.path] || 0;
+            let link:any = {};
+            link.file = file;
+			link.linkCount = count;
+			const fileCache = app.metadataCache.getCache(file.path);
+			if (fileCache) {
+				link.linkCount += fileCache.links ? fileCache.links.length : 0;
+                link.linkCount += fileCache.tags ? fileCache.tags.length : 0;
+			}
+            linkfiles.push(link as FileLink);
+		}
+        linkfiles.sort((a,b)=> {
+            return b.linkCount - a.linkCount;
+        })
+        let content:string[] = [];
+        for (let i=0;i<100 && i<linkfiles.length;i++) {
+            const linkfile = linkfiles[i];
+            let line = `${linkfile.linkCount} ${linkfile.file.basename}`;
+            content.push(line);
+        }
+        this.createContentPage(content.join(' \n'), 'tagLinkGrep');
     }
 
     async getTagTree(echoTree:boolean = true) {

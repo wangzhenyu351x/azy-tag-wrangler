@@ -123,6 +123,15 @@ export default class TagWrangler extends ZYPlugin {
                 this.tool.getTagTree();
             }
         });
+
+        this.addCommand({
+            id: 'grep link count',
+            name: 'grep link count',
+            callback: () => {
+                this.tool.grepFileHighLinks();
+            }
+        });
+
         this.tagAliasInfo = new TagAliasInfo(this.app, this);
 
         const tagHoverMain = "tag-wrangler:tag-pane";

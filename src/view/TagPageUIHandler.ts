@@ -44,15 +44,26 @@ export class TagPageUIHandler extends Component {
         );
         this.register(
             // Open tag page w/alt click (current pane) or ctrl/cmd/middle click (new pane)
-            onElement(document, "click", selector, (event, targetEl) => {
-                const { altKey,shiftKey } = event;
+            onElement(document, "click", selector, (event:KeyboardEvent, targetEl) => {
+                const { altKey,shiftKey,metaKey} = event;
                 const tagName = toTag(targetEl);
+                // @ts-ignore
+                const searchPlugin = this.plugin.app.internalPlugins.getPluginById("global-search"), search = searchPlugin && searchPlugin.instance, query = search && search.getGlobalSearchQuery();
                 if (shiftKey && selector != 'span.cm-hashtag') {  // 否则会和"选择区域"起冲突.
                     event.preventDefault();
                     event.stopPropagation();
                     this.plugin.tool.openFileWithTag(tagName);
                     return;
                 }
+
+                if (metaKey) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const res = fathTagSearchReg(tagName);
+                    search.openGlobalSearch(res);
+                    return;
+                }
+                
                 if (!altKey) {
                     // console.log('not alt click',selector,event.altKey,event);
                     if (selector == 'span.cm-hashtag') {
@@ -93,14 +104,7 @@ export class TagPageUIHandler extends Component {
                 if (altKey) {
                     event.preventDefault();
                     event.stopPropagation();
-                    // @ts-ignore
-                    const searchPlugin = this.plugin.app.internalPlugins.getPluginById("global-search"), search = searchPlugin && searchPlugin.instance, query = search && search.getGlobalSearchQuery();
-                    if (this.plugin.settings.searchFTagOnly) {
-                        const res = fathTagSearchReg(tagName);
-                        search.openGlobalSearch(res);
-                    } else {
-                        search.openGlobalSearch("tag:" + tagName);
-                    }
+                    search.openGlobalSearch("tag:" + tagName);
                 }
             }, { capture: true })
         );

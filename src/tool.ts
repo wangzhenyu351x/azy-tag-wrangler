@@ -34,11 +34,17 @@ export class Tool {
             await this.openTagPage(t.file as TFile, false, false);
         } else {
             const flist = list.map(a => a.file);
-            new CChooseFileModal(this.app,'','选择一个文件',flist,undefined).awaitSelection().then(f => {
-                if (f.file) {
-                    this.openTagPage(f.file as TFile, false, false);
-                }
-            }).catch(e=>{});
+            if (flist.length <5) {
+                new CChooseFileModal(this.app,'','选择一个文件',flist,undefined).awaitSelection().then(f => {
+                    if (f.file) {
+                        this.openTagPage(f.file as TFile, false, false);
+                    }
+                }).catch(e=>{});
+            } else {
+                // @ts-ignore
+                const searchPlugin = this.plugin.app.internalPlugins.getPluginById("global-search"), search = searchPlugin && searchPlugin.instance, query = search && search.getGlobalSearchQuery();
+                search.openGlobalSearch("tag:" + tagName)
+            }
         }
     }
 
@@ -104,9 +110,9 @@ export class Tool {
     }
 
     async getTagTree(echoTree:boolean = true) {
-        if (this.plugin.settings.tagoncount > 0) {
+        // if (this.plugin.settings.tagoncount > 0) {
             echoTree = false;
-        }
+        // }
         this.createContentPage('', 'tagTree');
         await this.waitOneSecond();
 
@@ -114,26 +120,32 @@ export class Tool {
         const map = this.app.metadataCache.getTagsOld();
         // @ts-ignore
         let childmap = this.app.metadataCache.childMap;
+        
         if (!childmap) {
             // @ts-ignore
             this.app.metadataCache.getTags();
             // @ts-ignore
             childmap = this.app.metadataCache.childMap;
         }
+        // @ts-ignore
+        const lowTagCount = this.app.metadataCache.lowTagCount;
+        // @ts-ignore
+        const childBigTagCount = this.app.metadataCache.childBigTagCount; 
+        // @ts-ignore
+        const ignoreTags = this.app.metadataCache.ignoreTags;
         const tagArr = Object.keys(map).filter(a => {
-            if (this.plugin.settings.grepTooManyChild) {
-                if (childmap[a] && childmap[a]> this.plugin.settings.childTagLimit) {
-                    return true;
-                }
-                return false;
+            // if (this.plugin.settings.grepTooManyChild) {
+            if (childmap[a] && childmap[a]> this.plugin.settings.childTagLimit) {
+                return true;
             }
+
             if (this.plugin.settings.tagoncount < 1) {
                 return true;
             }
             if (a.contains('/')) {
                 const arr = a.split('/');
                 const first = arr[0];
-                if (map[first] == 0) {
+                if (ignoreTags.contains(first)) {
                     return false;
                 }
                 if (this.plugin.settings.onlyLevel2 && arr.length > 2) {
@@ -154,7 +166,7 @@ export class Tool {
 
         // console.log(tagArr);
         let content = '';
-        if (echoTree) {
+        if (false) {
             let rootTagMap = new Map();
             for (const tagItem of tagArr) {
                 let itemArr = tagItem.split('/');
@@ -178,8 +190,10 @@ export class Tool {
                 let curTag = itemArr[0];
                 // if (map[`#${curTag}`] > 100) {
                 const tagOri = '#' + tagItem;
-                if (this.plugin.settings.grepTooManyChild) {
-                    stringArr.push(`${childmap[tagOri]} ${tagOri}`);
+                const childCount = childmap[tagOri]?? 0;
+                // childmap[a]> this.plugin.settings.childTagLimit
+                if (childmap[tagOri] && childmap[tagOri]> this.plugin.settings.childTagLimit) {
+                    stringArr.push(`${childmap[tagOri]}/${map[tagOri]} ${tagOri}`);
                 } else {
                     stringArr.push(`${map[tagOri]} ${tagOri}`);
                 }
@@ -189,7 +203,7 @@ export class Tool {
             content = stringArr.join('\n');
         }
         // console.log(content);
-        this.createContentPage(content, 'tagTree');
+        this.createContentPage(`${childBigTagCount}/${lowTagCount}\n\n` + content, 'tagTree');
     }
 
     echoMap(map: any, level = 0, prefixStr = '#') {

@@ -101,6 +101,9 @@ export class File {
         let changed = false, json = parsed.toJSON();
 
         function setInNode(node, value, afterKey=false) {
+            if (value.endsWith('zydel')) {
+                value = '';
+            }
             CST.setScalarValue(node.srcToken, value, {afterKey});
             changed = true;
             node.value = value;

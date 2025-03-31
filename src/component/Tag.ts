@@ -100,17 +100,17 @@ export class Replacement {
         if (this.toTag.tag.endsWith('_zydel')) {
             return text.slice(0, pos) + text.slice(pos + fromTagLen);
         }
-        if (this.toTag.tag.endsWith(kCptTag)) {
-            let tagName = this.fromTag.name;
-            if (!tagName.startsWith('#')) {
-                tagName = '#'+tagName;
-            }
-            const formatStr = "YY/MM/DD HH:mm";
-            const dayfmt = dayjs().format(formatStr);
-            tagName = tagName.replace('#task/',`✅ task/`) + ` ${dayfmt} `;
-            this.addToTodayNote(tagName,filepath);
-            return text.slice(0, pos) + tagName + text.slice(pos + fromTagLen);
-        }
+        // if (this.toTag.tag.endsWith(kCptTag)) {
+        //     let tagName = this.fromTag.name;
+        //     if (!tagName.startsWith('#')) {
+        //         tagName = '#'+tagName;
+        //     }
+        //     const formatStr = "YY/MM/DD HH:mm";
+        //     const dayfmt = dayjs().format(formatStr);
+        //     tagName = tagName.replace('#task/',`✅ task/`) + ` ${dayfmt} `;
+        //     this.addToTodayNote(tagName,filepath);
+        //     return text.slice(0, pos) + tagName + text.slice(pos + fromTagLen);
+        // }
         return text.slice(0, pos) + this.toTag.tag + addition + text.slice(pos + fromTagLen);
     }
 

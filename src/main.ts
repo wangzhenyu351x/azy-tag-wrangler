@@ -292,7 +292,8 @@ export default class TagWrangler extends ZYPlugin {
     
                         let childMap = {};
                         let lowTagCount = 0;
-                        const igArr = ['#tech', '#res', '#t'];
+                        let childBigTagCount = 0;
+                        const igArr = ['#tech', '#res', '#t', '#area'];
                         for (const tagKey of names) {
                             if (tagKey.contains('/')) {
                                 const arr = tagKey.split('/');
@@ -302,8 +303,13 @@ export default class TagWrangler extends ZYPlugin {
                                 if (that.settings.tagCountSolo) {
                                     tags[faKey] -= tags[tagKey];
                                 }
-                                if (!igArr.contains(rootKey) && tags[tagKey] > 0 && tags[tagKey]<5) {
-                                    lowTagCount +=1;
+                                if (!igArr.contains(rootKey)) {
+                                    if ( tags[tagKey] > 0 && tags[tagKey]<5) {
+                                        lowTagCount +=1;
+                                    }
+                                    if (childMap[tagKey] && childMap[tagKey]>5) {
+                                        childBigTagCount ++;
+                                    }
                                 }
 
                                 if (childMap[faKey]) {
@@ -311,25 +317,19 @@ export default class TagWrangler extends ZYPlugin {
                                 } else {
                                     childMap[faKey] = 1;
                                 }
-                                // if (tagKey.startsWith('#task')) {
-                                //     if (tagKey.contains('task/1')) {
-                                //         tags[tagKey] += 20;
-                                //     } else if (tagKey.contains('task/2')) {
-                                //         tags[tagKey] += 10;
-                                //     }
-                                // }
                             }
                         }
-                        that.statusBar.innerHTML = `${lowTagCount}`;
-                        
-                        if (tags['#task']) {
-                            tags['#task'] += 10000;
-                        }
+                        that.statusBar.innerHTML = `${childBigTagCount}/${lowTagCount}`;
     
-                        const folderLimit = that.settings.childTagLimit;
+                        // const folderLimit = that.settings.childTagLimit;
                         const keys = Object.keys(childMap);
                         for (const key of keys) {
-                            if (childMap[key] > 9) {
+                            if(childMap[key] > 99) {
+                                if (childMap[key] %10 == 0) {
+                                    childMap[key] -= 1;
+                                }
+                                tags[key] += childMap[key]/1000.0;
+                            } else if (childMap[key] > 9) {
                                 if (childMap[key] %10 == 0) {
                                     childMap[key] -= 1;
                                 }
@@ -340,20 +340,21 @@ export default class TagWrangler extends ZYPlugin {
                             }
                         }
     
-                        this.ignoreTags = igArr.concat(['#task']);
+                        this.ignoreTags = igArr;
                         this.childMap = childMap;
-                        const resKey = '#res';
-                        for (let i = 0; i < igArr.length; i++) {
-                            const tagItem = igArr[i];
-                            if (tags[tagItem] && (tags[tagItem] > 10 || tags[tagItem] < 0)) {
-                                if (tagItem == resKey && childMap[resKey]) {
-                                    tags[tagItem] = childMap[tagItem]/100.0;
-                                } else {
-                                    tags[tagItem] = 0;   
-                                }
-                            }
-                        }
-    
+                        this.lowTagCount = lowTagCount;
+                        this.childBigTagCount = childBigTagCount;
+                        // const resKey = '#res';
+                        // for (let i = 0; i < igArr.length; i++) {
+                        //     const tagItem = igArr[i];
+                        //     if (tags[tagItem] && (tags[tagItem] > 10 || tags[tagItem] < 0)) {
+                        //         if (childMap[resKey]) {
+                        //             tags[tagItem] = ((tags[tagItem] * 1000) %1000) / 1000.0;
+                        //         }
+                        //     }
+                        // }
+
+                        this.curTags = tags;
                         return tags;
                     };
                 }
@@ -468,6 +469,35 @@ export default class TagWrangler extends ZYPlugin {
                                 that.isSelfClick = true;
                                 old.apply(this,arguments);
                                 that.isSelfClick = false;
+                            };
+                        },
+                    }));
+                    function fmttag(tag:string) {
+                        if (tag == '#area') {
+                            tag = '#q';
+                        } 
+                        return tag;
+                    }
+                    // metaCache.curTags
+                    this.register(around(Object.getPrototypeOf(tree.root.vChildren), {
+                        sort(old) {
+                            return function () {
+                                const item = this.first();
+                                if (item && item.tag && item.tag.contains('/')) {
+                                    return old.apply(this,arguments);
+                                }
+                                const fistitem = this._children.first();
+                                if (fistitem && fistitem.tag) {
+                                    this._children.sort((a,b)=> {
+                                        let atag = a.tag;
+                                        let btag = b.tag;
+                                        atag = fmttag(atag);
+                                        btag = fmttag(btag);
+                                        return atag.localeCompare(btag);
+                                    });
+                                } else {
+                                    return old.apply(this,arguments);
+                                }
                             };
                         },
                     }));

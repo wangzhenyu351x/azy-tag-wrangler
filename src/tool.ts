@@ -135,9 +135,6 @@ export class Tool {
         const ignoreTags = this.app.metadataCache.ignoreTags;
         const tagArr = Object.keys(map).filter(a => {
             // if (this.plugin.settings.grepTooManyChild) {
-            if (childmap[a] && childmap[a]> this.plugin.settings.childTagLimit) {
-                return true;
-            }
 
             if (this.plugin.settings.tagoncount < 1) {
                 return true;
@@ -151,6 +148,12 @@ export class Tool {
                 if (this.plugin.settings.onlyLevel2 && arr.length > 2) {
                     return false;
                 }
+            }
+            if (childmap[a] && childmap[a]> this.plugin.settings.childTagLimit) {
+                if (ignoreTags.contains(a)) {
+                    return false;
+                }
+                return true;
             }
             if (this.plugin.settings.grepTag.length > 0) {
                 const grepTag = this.plugin.settings.grepTag.first();
@@ -190,16 +193,28 @@ export class Tool {
                 let curTag = itemArr[0];
                 // if (map[`#${curTag}`] > 100) {
                 const tagOri = '#' + tagItem;
-                const childCount = childmap[tagOri]?? 0;
+                let childCount = childmap[tagOri]?? 0;
+                let childStr = `${childCount}`;
+                if (childCount < 10) {
+                    childStr = '0'+childStr;
+                }
                 // childmap[a]> this.plugin.settings.childTagLimit
                 if (childmap[tagOri] && childmap[tagOri]> this.plugin.settings.childTagLimit) {
-                    stringArr.push(`${childmap[tagOri]}/${map[tagOri]} ${tagOri}`);
+                    stringArr.push(`_${childStr}/${map[tagOri]} ${tagOri}`);
                 } else {
                     stringArr.push(`${map[tagOri]} ${tagOri}`);
                 }
                 // }
             }
-            stringArr.sort((a,b)=>b.localeCompare(a));
+            stringArr.sort((a,b)=>{
+                if (a.startsWith('_') && !b.startsWith('_')) {
+                    return -1;
+                }
+                if (!a.startsWith('_') && b.startsWith('_')) {
+                    return 1;
+                }
+                return b.localeCompare(a)
+            });
             content = stringArr.join('\n');
         }
         // console.log(content);

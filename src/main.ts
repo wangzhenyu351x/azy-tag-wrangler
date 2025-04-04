@@ -295,23 +295,28 @@ export default class TagWrangler extends ZYPlugin {
                         let childBigTagCount = 0;
                         const igArr = ['#tech', '#res', '#t', '#area'];
                         for (const tagKey of names) {
+                            let faKey = null;
+                            let rootKey = tagKey;
                             if (tagKey.contains('/')) {
                                 const arr = tagKey.split('/');
                                 arr.pop();
-                                const rootKey = arr[0];
-                                const faKey = arr.join('/');
+                                rootKey = arr[0];
+                                faKey = arr.join('/');
                                 if (that.settings.tagCountSolo) {
                                     tags[faKey] -= tags[tagKey];
                                 }
-                                if (!igArr.contains(rootKey)) {
-                                    if ( tags[tagKey] > 0 && tags[tagKey]<5) {
-                                        lowTagCount +=1;
-                                    }
-                                    if (childMap[tagKey] && childMap[tagKey]>5) {
-                                        childBigTagCount ++;
-                                    }
-                                }
+                            } 
 
+                            if (!igArr.contains(rootKey)) {
+                                if ( tags[tagKey] > 0 && tags[tagKey]<5) {
+                                    lowTagCount +=1;
+                                }
+                                if (childMap[tagKey] && childMap[tagKey]> that.settings.childTagLimit ) {
+                                    childBigTagCount ++;
+                                }
+                            }
+
+                            if (faKey) {
                                 if (childMap[faKey]) {
                                     childMap[faKey] += 1;
                                 } else {

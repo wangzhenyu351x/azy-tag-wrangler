@@ -56,6 +56,14 @@ export class TagPageUIHandler extends Component {
                     return;
                 }
 
+                if (shiftKey && altKey && selector == 'span.cm-hashtag') {  // 否则会和"选择区域"起冲突.
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const last = tagName.split('/').pop();
+                    search.openGlobalSearch(last +" -tag:" + tagName);
+                    return;
+                }
+
                 if (metaKey) {
                     event.preventDefault();
                     event.stopPropagation();

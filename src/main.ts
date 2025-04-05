@@ -135,6 +135,7 @@ export default class TagWrangler extends ZYPlugin {
         });
 
         this.tagAliasInfo = new TagAliasInfo(this.app, this);
+        this.tagAliasInfo.getTagInfo();
 
         const tagHoverMain = "tag-wrangler:tag-pane";
         // @ts-ignore

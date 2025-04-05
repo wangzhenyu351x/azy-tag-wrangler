@@ -45,14 +45,20 @@ export class TagAliasInfo {
 		try {
 			const arr = data.split('\n');
 			const newTagInfo = {} as TagInfoDict;
+			// @ts-ignore
+			const map = this.app.metadataCache.getTags();
 			arr.filter(a => a.startsWith('#') && a.contains('||')).forEach((value:string,idx:number)=> {
 				const arr = value.split('||');
 				const key = arr[0].trim();
 				const values = arr[1].split(',').map(a => a.trim());
 				newTagInfo[key] = {alias:values};
+				if (!map[key]) {
+					const msg = `alias不存在: ${key}`;
+					console.log(msg);
+					new Notice(msg,0);
+				}
 			});
 			this.tagInfo = newTagInfo;
-            // console.log(this.tagInfo);
 		} catch (ex) {
 			console.log(ex);
 			// NO OP.

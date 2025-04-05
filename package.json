@@ -38,6 +38,6 @@
   "dependencies": {
     "@popperjs/core": "^2.10.1",
     "fs": "0.0.1-security",
-    "zycommonlib": "file:../ZYCommonLib"
+    "@a/zycommonlib": "file:../ZYCommonLib"
   }
 }

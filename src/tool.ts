@@ -120,6 +120,8 @@ export class Tool {
         const map = this.app.metadataCache.getTagsOld();
         // @ts-ignore
         let childmap = this.app.metadataCache.childMap;
+
+        
         
         if (!childmap) {
             // @ts-ignore
@@ -128,11 +130,11 @@ export class Tool {
             childmap = this.app.metadataCache.childMap;
         }
         // @ts-ignore
-        const lowTagCount = this.app.metadataCache.lowTagCount;
-        // @ts-ignore
-        const childBigTagCount = this.app.metadataCache.childBigTagCount; 
+        const analysisStr = this.app.metadataCache.analysisStr;
         // @ts-ignore
         const ignoreTags = this.app.metadataCache.ignoreTags;
+        // @ts-ignore
+        const fasolo = this.app.metadataCache.fasolo;
         const tagArr = Object.keys(map).filter(a => {
             // if (this.plugin.settings.grepTooManyChild) {
 
@@ -148,6 +150,12 @@ export class Tool {
                 if (this.plugin.settings.onlyLevel2 && arr.length > 2) {
                     return false;
                 }
+            }
+            if (fasolo[a] && fasolo[a]> this.plugin.settings.tagLimit) {
+                if (ignoreTags.contains(a)) {
+                    return false;
+                }
+                return true;
             }
             if (childmap[a] && childmap[a]> this.plugin.settings.childTagLimit) {
                 if (ignoreTags.contains(a)) {
@@ -200,17 +208,28 @@ export class Tool {
                 }
                 // childmap[a]> this.plugin.settings.childTagLimit
                 if (childmap[tagOri] && childmap[tagOri]> this.plugin.settings.childTagLimit) {
-                    stringArr.push(`_${childStr}/${map[tagOri]} ${tagOri}`);
+                    stringArr.push(`|| ${childStr}/${map[tagOri]} ${tagOri}`);
+                } else if (fasolo[tagOri] && fasolo[tagOri]> this.plugin.settings.tagLimit) {
+                    stringArr.push(`++ ${fasolo[tagOri]}/${map[tagOri]} ${tagOri}`);
                 } else {
                     stringArr.push(`${map[tagOri]} ${tagOri}`);
                 }
                 // }
             }
+            
             stringArr.sort((a,b)=>{
-                if (a.startsWith('_') && !b.startsWith('_')) {
+                let topStr = '++';
+                if (a.startsWith(topStr) && !b.startsWith(topStr)) {
                     return -1;
                 }
-                if (!a.startsWith('_') && b.startsWith('_')) {
+                if (!a.startsWith(topStr) && b.startsWith(topStr)) {
+                    return 1;
+                }
+                topStr = '||';
+                if (a.startsWith(topStr) && !b.startsWith(topStr)) {
+                    return -1;
+                }
+                if (!a.startsWith(topStr) && b.startsWith(topStr)) {
                     return 1;
                 }
                 return b.localeCompare(a)
@@ -218,7 +237,7 @@ export class Tool {
             content = stringArr.join('\n');
         }
         // console.log(content);
-        this.createContentPage(`${childBigTagCount}/${lowTagCount}\n\n` + content, 'tagTree');
+        this.createContentPage(`${analysisStr}\n\n` + content, 'tagTree');
     }
 
     echoMap(map: any, level = 0, prefixStr = '#') {

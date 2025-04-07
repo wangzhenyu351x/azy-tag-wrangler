@@ -26,6 +26,7 @@ interface TagSettings {
     childTagLimit:number;
     grepTag:string[];
     tagCountSolo:boolean;
+    tagLimit:number;
     onlyLevel2:boolean;
     grepTooManyChild: boolean;
     tagSuggestSortDESC:boolean;
@@ -39,6 +40,7 @@ const DefaultTagSettings = {
     fromCount:0, 
     grepTag:[], 
     tagCountSolo:true ,
+    tagLimit:30,
     onlyLevel2:false ,
     tagSuggestSortDESC:true ,
     grepTooManyChild:false,
@@ -286,6 +288,7 @@ export default class TagWrangler extends ZYPlugin {
                     metaCache.getTagsOld = old;
                     return function getTags() {
                         const tags = old.call(this);
+                        const fasolo = Object.assign({},tags);
                         const names = Object.keys(tags); // .map(t => t.toLowerCase()));
                         names.sort((a,b)=> {
                             return b.length - a.length;
@@ -294,6 +297,7 @@ export default class TagWrangler extends ZYPlugin {
                         let childMap = {};
                         let lowTagCount = 0;
                         let childBigTagCount = 0;
+                        let fasoloCount = 0;
                         const igArr = ['#tech', '#res', '#t', '#area'];
                         for (const tagKey of names) {
                             let faKey = null;
@@ -303,17 +307,21 @@ export default class TagWrangler extends ZYPlugin {
                                 arr.pop();
                                 rootKey = arr[0];
                                 faKey = arr.join('/');
-                                if (that.settings.tagCountSolo) {
-                                    tags[faKey] -= tags[tagKey];
-                                }
-                            } 
+                                // if (that.settings.tagCountSolo) {
+                                //     tags[faKey] -= tags[tagKey];
+                                // } 
+                                fasolo[faKey] -= fasolo[tagKey];
+                             }
 
                             if (!igArr.contains(rootKey)) {
-                                if ( tags[tagKey] > 0 && tags[tagKey]<5) {
+                                if (tags[tagKey] > 0 && tags[tagKey]<5) {
                                     lowTagCount +=1;
                                 }
                                 if (childMap[tagKey] && childMap[tagKey]> that.settings.childTagLimit ) {
                                     childBigTagCount ++;
+                                }
+                                if(fasolo[tagKey]>that.settings.tagLimit) {
+                                    fasoloCount ++;
                                 }
                             }
 
@@ -325,7 +333,8 @@ export default class TagWrangler extends ZYPlugin {
                                 }
                             }
                         }
-                        that.statusBar.innerHTML = `${childBigTagCount}/${lowTagCount}`;
+                        this.analysisStr = `${childBigTagCount}/${fasoloCount}/${lowTagCount}`
+                        that.statusBar.innerHTML = this.analysisStr;
     
                         // const folderLimit = that.settings.childTagLimit;
                         const keys = Object.keys(childMap);
@@ -348,8 +357,7 @@ export default class TagWrangler extends ZYPlugin {
     
                         this.ignoreTags = igArr;
                         this.childMap = childMap;
-                        this.lowTagCount = lowTagCount;
-                        this.childBigTagCount = childBigTagCount;
+                        this.fasolo = fasolo;
                         // const resKey = '#res';
                         // for (let i = 0; i < igArr.length; i++) {
                         //     const tagItem = igArr[i];

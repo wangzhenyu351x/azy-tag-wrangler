@@ -74,6 +74,14 @@ export class TagSettingsTab extends PluginSettingTab {
                     this.plugin.settings.tagCountSolo = value;
                     this.plugin.saveSettings();
                 });
+            }).addSlider(to => {
+                to.setValue(this.plugin.settings.tagLimit);
+                to.setLimits(10,40,2);
+                to.setDynamicTooltip();
+                to.onChange(value => {
+                    this.plugin.settings.tagLimit = value;
+                    this.plugin.saveSettings();
+                });
             })
 
         new Setting(this.containerEl)
